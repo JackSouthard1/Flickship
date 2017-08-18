@@ -256,7 +256,7 @@ public class GameManager : NetworkBehaviour {
 	private void SpawnAstroid (Vector3 spawnPos, float size)
 	{
 		// Find vertex angles from center
-		int vertexCount = Mathf.RoundToInt(astroidResolution * size);
+		int vertexCount = Mathf.RoundToInt (astroidResolution * size);
 		float[] vertexAngles = new float[vertexCount];
 		float angleDifference = 360f / vertexCount;
 		for (int i = 0; i < vertexAngles.Length; i++) {
@@ -264,58 +264,71 @@ public class GameManager : NetworkBehaviour {
 		}
 
 		// Generate vertex points
-		List<Vector3> verticies = new List<Vector3>();
-		verticies.Add(Vector3.zero);
+		List<Vector3> verticies = new List<Vector3> ();
+		verticies.Add (Vector3.zero);
 		float previousRadius = size;
 		for (int i = 1; i < vertexCount + 1; i++) {
-			float angleInRad = Mathf.Deg2Rad * (vertexAngles[i - 1]);
+			float angleInRad = Mathf.Deg2Rad * (vertexAngles [i - 1]);
 
-			float vertexRadius = previousRadius + Random.Range(-maxVertexHeightDifference * size, maxVertexHeightDifference * size);
+			float vertexRadius = previousRadius + Random.Range (-maxVertexHeightDifference * size, maxVertexHeightDifference * size);
 
 			float angleVectorX = Mathf.Cos (angleInRad);
 			float angleVectorY = Mathf.Sin (angleInRad);
 			Vector3 angleVector = new Vector3 (angleVectorX, angleVectorY, 0);
 
-			verticies.Add(angleVector * vertexRadius);
+			verticies.Add (angleVector * vertexRadius);
 
 			previousRadius = vertexRadius;
 		}
 
 		// Generate Triangles Array
-		List<int> triangles = new List<int>();
+		List<int> triangles = new List<int> ();
 		for (int i = 0; i < vertexCount; i++) {
-			triangles.Add(0);
-			triangles.Add(i + 1);
+			triangles.Add (0);
+			triangles.Add (i + 1);
 
 			if (i + 2 != vertexCount + 1) {
-				triangles.Add(i + 2);
+				triangles.Add (i + 2);
 			} else {
-				triangles.Add(1);
+				triangles.Add (1);
 			}
 		}
 
 		// Generate collider path
 		Vector2[] colPath = new Vector2[vertexCount];
 		for (int i = 0; i < colPath.Length; i++) {
-			Vector3 point = verticies[i + 1];
-			colPath[i] = new Vector2(point.x, point.y);
+			Vector3 point = verticies [i + 1];
+			colPath [i] = new Vector2 (point.x, point.y);
 		}
 
 		// Generate Mesh
-		Mesh mesh = new Mesh();
-		mesh.SetVertices(verticies);
-		mesh.SetTriangles(triangles, 0);
-		mesh.RecalculateBounds();
+		Mesh mesh = new Mesh ();
+		mesh.SetVertices (verticies);
+		mesh.SetTriangles (triangles, 0);
+		mesh.RecalculateBounds ();
 
 		// Create GO
-		GameObject astroid = GameObject.Instantiate(astroidPrefab);
+		GameObject astroid = GameObject.Instantiate (astroidPrefab);
 		astroid.transform.position = spawnPos;
-		astroid.transform.Rotate(new Vector3(180, 0, Random.Range(0, 360)));
+		astroid.transform.Rotate (new Vector3 (180, 0, Random.Range (0, 360)));
 		// Set mesh
-		astroid.GetComponent<MeshFilter>().mesh = mesh;
+		astroid.GetComponent<MeshFilter> ().mesh = mesh;
 
 		// Set collider
-		astroid.GetComponent<PolygonCollider2D>().SetPath(0, colPath);
+		astroid.GetComponent<PolygonCollider2D> ().SetPath (0, colPath);
+
+		// Set border
+		Vector3[] lrPath = new Vector3[vertexCount + 1];
+		for (int i = 0; i < lrPath.Length; i++) {
+			if (i == vertexCount) {
+				lrPath[i] = new Vector3 (colPath [0].x, colPath [0].y, 0);
+			} else {
+				lrPath [i] = new Vector3 (colPath [i].x, colPath [i].y, 0);
+			}
+
+		}
+		astroid.GetComponent<LineRenderer>().numPositions = vertexCount + 1;
+		astroid.GetComponent<LineRenderer>().SetPositions(lrPath);
 	}
 }
 
