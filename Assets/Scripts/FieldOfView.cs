@@ -95,7 +95,8 @@ public class FieldOfView : MonoBehaviour {
 
 		verticies [0] = Vector3.zero;
 		for (int i = 0; i < vertexCount - 1; i++) {
-			verticies [i + 1] = transform.InverseTransformPoint (viewPoints [i] + Vector3.up * maskCutawayDst);
+//			float cutawayMultiplier = (viewPoints[i].magnitude + maskCutawayDst) / viewPoints[i].magnitude;
+			verticies [i + 1] = transform.InverseTransformPoint (viewPoints [i]);
 
 			if (i < vertexCount - 2) {
 				triangles [i * 3] = 0;

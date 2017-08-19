@@ -343,17 +343,17 @@ public class GameManager : NetworkBehaviour {
 		astroid.GetComponent<PolygonCollider2D> ().SetPath (0, colPath);
 
 		// Set border
-//		Vector3[] lrPath = new Vector3[vertexCount + 1];
-//		for (int i = 0; i < lrPath.Length; i++) {
-//			if (i == vertexCount) {
-//				lrPath[i] = new Vector3 (colPath [0].x, colPath [0].y, 0);
-//			} else {
-//				lrPath [i] = new Vector3 (colPath [i].x, colPath [i].y, 0);
-//			}
-//
-//		}
-//		astroid.GetComponent<LineRenderer>().numPositions = vertexCount + 1;
-//		astroid.GetComponent<LineRenderer>().SetPositions(lrPath);
+		Vector3[] lrPath = new Vector3[vertexCount + 1];
+		for (int i = 0; i < lrPath.Length; i++) {
+			if (i == vertexCount) {
+				lrPath[i] = new Vector3 (colPath [0].x, colPath [0].y, 0);
+			} else {
+				lrPath [i] = new Vector3 (colPath [i].x, colPath [i].y, 0);
+			}
+
+		}
+		astroid.GetComponent<LineRenderer>().numPositions = vertexCount + 1;
+		astroid.GetComponent<LineRenderer>().SetPositions(lrPath);
 	}
 
 	private bool SafeSpawnPos (Vector3 pos, float size)
