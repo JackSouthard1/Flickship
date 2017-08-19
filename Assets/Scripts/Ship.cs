@@ -9,6 +9,8 @@ public class Ship : MonoBehaviour {
 	public float thrust;
 	public int health;
 	public Weapon weapon;
+	private float shootPathResolution = 5f;
+	private float minPowerRatio = 0.2f;
 
 	private enum Stage
 	{
@@ -179,7 +181,12 @@ public class Ship : MonoBehaviour {
 			origionalRot = transform.rotation;
 
 			actionUnderway = true;
-			localPlayer.HandleShipAction (shipNumber, -direction, "Shoot");
+
+			float powerRatio = (dragVector.magnitude - shootRadius) / (moveRadius - shootRadius);
+			powerRatio = (-4f * powerRatio) * (powerRatio - 1f);
+			powerRatio = Mathf.Clamp(powerRatio, minPowerRatio, 1f);
+
+			localPlayer.HandleShipAction (shipNumber, -direction * powerRatio, "Shoot");
 		} else if (stage == Stage.LooseDrag) {
 			transform.rotation = origionalRot;
 		}
@@ -213,13 +220,40 @@ public class Ship : MonoBehaviour {
 		}
 	}
 
-	private void UpdateShootPath () {
+	private void UpdateShootPath ()
+	{
 		float basicRatio = (dragVector.magnitude - shootRadius) / (moveRadius - shootRadius);
-//		shootPathLengthRatio = (-4f * basicRatio) * (basicRatio - 1f);
+		float projectileRange = weapon.projectileRange;
 
-		Vector3[] pathVerts = new Vector3[2];
-		pathVerts [0] = shootPath.transform.position;
-		pathVerts [1] = transform.TransformPoint ((Vector3.up * weapon.projectileRange) + shootPath.transform.localPosition);
+		float modifierRatio = 1;
+		int nodeCount = 2;
+
+		Vector3[] pathVerts;
+		if (weapon.trajectory == Weapon.Trajectory.Wave) {
+			modifierRatio = (-4f * basicRatio) * (basicRatio - 1f);
+			modifierRatio = Mathf.Clamp(modifierRatio, minPowerRatio, 1f);
+
+			nodeCount = Mathf.RoundToInt(shootPathResolution * projectileRange);
+			shootPath.numPositions = nodeCount;
+
+			float nodeIncriment = 1f/nodeCount;
+			float[] nodePercentageY = new float[nodeCount];
+			for (int i = 0; i < nodePercentageY.Length; i++) {
+				nodePercentageY[i] = nodeIncriment * i;
+			}
+
+			pathVerts = new Vector3[nodeCount];
+			for (int i = 0; i < pathVerts.Length; i++) {
+				float x = 3 * Mathf.Sin(4f * nodePercentageY[i] / modifierRatio);
+				Vector3 localPos = new Vector3(x, (projectileRange * nodePercentageY[i] + shootPath.transform.localPosition.y), 0);
+				pathVerts[i] = transform.TransformPoint (localPos);
+			}
+		} else {
+			shootPath.numPositions = 2;
+			pathVerts = new Vector3[2];
+			pathVerts [0] = shootPath.transform.position;
+			pathVerts [1] = transform.TransformPoint ((Vector3.up * projectileRange * modifierRatio) + shootPath.transform.localPosition);
+		}
 		shootPath.SetPositions (pathVerts);
 	}
 }

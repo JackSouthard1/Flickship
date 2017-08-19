@@ -21,7 +21,7 @@ public class HostGame : MonoBehaviour {
 	public void CreateRoom ()
 	{
 		if (roomName != null) {
-			 print ("Creating Room: " + roomName);
+//			 print ("Creating Room: " + roomName);
 			 NetworkManager.singleton.matchMaker.CreateMatch(roomName, roomSize, true, "", "", "", 0, 0, NetworkManager.singleton.OnMatchCreate);
 		}
 	}

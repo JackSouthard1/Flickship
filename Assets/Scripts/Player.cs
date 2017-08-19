@@ -147,11 +147,12 @@ public class Player : NetworkBehaviour {
 			Bullet bulletScript = newBullet.GetComponent<Bullet> ();
 			bulletScript.localPlayer = GetComponent<Player> ();
 			bulletScript.parentShipNumber = shipNumber;
-			bulletScript.SetupBullet(range: ship.GetComponent<Ship>().weapon.projectileRange, damage: ship.GetComponent<Ship>().weapon.projectileDamage);
+			Weapon weapon = ship.GetComponent<Ship>().weapon;
+			bulletScript.SetupBullet(range: weapon.projectileRange, damage: weapon.projectileDamage, trajectory: weapon.trajectory, powerRatio: direction.magnitude);
 
 			newBullet.transform.rotation = newRot;
 			newBullet.transform.position = ship.transform.FindChild ("BulletSpawn").position;
-			newBullet.GetComponent<Rigidbody2D> ().velocity = direction * ship.GetComponent<Ship>().weapon.projectileSpeed;
+			newBullet.GetComponent<Rigidbody2D> ().velocity = direction.normalized * ship.GetComponent<Ship>().weapon.projectileSpeed;
 
 			actionState = ActionUnderway.ShootAction;
 		}

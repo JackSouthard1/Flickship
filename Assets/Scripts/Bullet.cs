@@ -3,15 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour {
-
-	public enum Trajectory
-	{
-		Straight,
-		Wave
-	};
-	public Trajectory trajectory;
+	public Weapon.Trajectory trajectory;
+	private float powerRatio = 1;
 	private float xOffset = 0;
-	private float maxOffset = 3;
 	[Space(30)]
 	public Player localPlayer;
 	public int parentShipNumber;
@@ -35,9 +29,11 @@ public class Bullet : MonoBehaviour {
 		}
 	}
 
-	public void SetupBullet (float range, int damage) {
+	public void SetupBullet (float range, int damage, Weapon.Trajectory trajectory, float powerRatio) {
 		this.range = range;
 		this.damage = damage;
+		this.trajectory = trajectory;
+		this.powerRatio = powerRatio;
 		percentLifetime = 0f;
 	}
 
@@ -46,7 +42,7 @@ public class Bullet : MonoBehaviour {
 		distanceTraveled = (transform.position - startPos).magnitude;
 		percentLifetime = distanceTraveled / range;
 
-		if (trajectory == Trajectory.Wave) {
+		if (trajectory == Weapon.Trajectory.Wave) {
 			CalculateWaveOffset();
 			transform.GetChild(0).localPosition = new Vector3 (xOffset, 0, 0);
 		}
@@ -61,7 +57,7 @@ public class Bullet : MonoBehaviour {
 	}
 
 	void CalculateWaveOffset () {
-		xOffset = maxOffset * Mathf.Sin(9.5f * percentLifetime);
+		xOffset = 3 * Mathf.Sin(4f * percentLifetime * (1/powerRatio));
 	}
 
 	void OnTriggerEnter2D (Collider2D col)

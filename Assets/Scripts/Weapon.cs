@@ -3,6 +3,12 @@ using UnityEngine;
 
 [System.Serializable]
 public class Weapon {
+	public enum Trajectory
+	{
+		Straight,
+		Wave
+	};
+	public Trajectory trajectory;
 	public float projectileSpeed;
 	public float projectileRange;
 	public int projectileDamage;
