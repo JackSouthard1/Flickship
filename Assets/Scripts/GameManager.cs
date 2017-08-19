@@ -252,12 +252,12 @@ public class GameManager : NetworkBehaviour {
 	private void GenerateAstroids (int seed)
 	{
 		Random.InitState(seed);
-
+		float sizeIncriments = (astroidSizeMax - astroidSizeMin) / astroidCount;
 		for (int i = 0; i < astroidCount; i++) {
 			float x = Random.Range (-mapData.mapWidth / 2, mapData.mapWidth / 2);
 			float y = Random.Range (-astroidMaxY, astroidMaxY);
 			Vector3 spawnPos = new Vector3 (x, y, 0);
-			float size = Random.Range (astroidSizeMin, astroidSizeMax);
+			float size = astroidSizeMax - (i * sizeIncriments);
 			SpawnAstroid (spawnPos, size);
 //			if (SafeSpawnPos(spawnPos, size)) {
 //				SpawnAstroid (spawnPos, size);
