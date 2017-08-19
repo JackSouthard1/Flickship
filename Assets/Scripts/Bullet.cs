@@ -77,7 +77,10 @@ public class Bullet : MonoBehaviour {
 				localPlayer.HandleBulletHit (col.gameObject, parentShipNumber, damage);
 			}
 
-			Destroy(gameObject);
+			Destroy (gameObject);
+		} else if (col.gameObject.tag == "Astroid") {
+			localPlayer.HandleBulletMiss (parentShipNumber);
+			Destroy (gameObject);
 		}
 	}
 }
