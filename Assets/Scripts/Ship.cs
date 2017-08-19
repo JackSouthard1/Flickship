@@ -156,7 +156,6 @@ public class Ship : MonoBehaviour {
 
 		if (stage == Stage.Shoot) {
 			CalculateSway();
-			shipHull.localRotation = Quaternion.Euler(new Vector3(0, 0, sway));
 			UpdateShootPath();
 			shootPath.gameObject.SetActive (true);
 		} else {
@@ -165,7 +164,6 @@ public class Ship : MonoBehaviour {
 
 		if (stage == Stage.Move) {
 			shipGhost.gameObject.SetActive(true);
-			shipHull.localRotation = Quaternion.Euler(Vector3.zero);
 		} else {
 			shipGhost.gameObject.SetActive(false);
 		}
