@@ -6,7 +6,8 @@ public class Weapon {
 	public enum Trajectory
 	{
 		Straight,
-		Wave
+		Wave,
+		Curve,
 	};
 	public Trajectory trajectory;
 	public float projectileSpeed;

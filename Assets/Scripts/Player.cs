@@ -111,25 +111,25 @@ public class Player : NetworkBehaviour {
 		gm.CmdTurnOver();
 	}
 
-	public void HandleShipAction (int shipNumber, Vector2 direction, string actionType)
+	public void HandleShipAction (int shipNumber, Vector2 direction, string actionType, int sign = 1)
 	{
-		CmdShipAction (shipNumber, direction, actionType);
+		CmdShipAction (shipNumber: shipNumber, direction: direction, actionType: actionType, sign: sign);
 		gm.ActionUsed();
 	}
 
 	[Command]
-	public void CmdShipAction (int shipNumber, Vector2 direction, string actionType)
+	public void CmdShipAction (int shipNumber, Vector2 direction, string actionType, int sign)
 	{
-		RpcShipAction (shipNumber, direction, actionType);
+		RpcShipAction (shipNumber: shipNumber, direction: direction, actionType: actionType, sign: sign);
 	}
 
 	[ClientRpc]
-	public void RpcShipAction (int shipNumber, Vector2 direction, string actionType)
+	public void RpcShipAction (int shipNumber, Vector2 direction, string actionType, int sign)
 	{
-		ExecuteShipAction (shipNumber, direction, actionType);
+		ExecuteShipAction (shipNumber: shipNumber, direction: direction, actionType: actionType, sign: sign);
 	}
 
-	private void ExecuteShipAction (int shipNumber, Vector2 direction, string actionType)
+	private void ExecuteShipAction (int shipNumber, Vector2 direction, string actionType, int sign)
 	{
 		GameObject ship = gm.GetShipWithShipNumber (shipNumber);
 
@@ -148,7 +148,7 @@ public class Player : NetworkBehaviour {
 			bulletScript.localPlayer = GetComponent<Player> ();
 			bulletScript.parentShipNumber = shipNumber;
 			Weapon weapon = ship.GetComponent<Ship>().weapon;
-			bulletScript.SetupBullet(range: weapon.projectileRange, damage: weapon.projectileDamage, trajectory: weapon.trajectory, powerRatio: direction.magnitude);
+			bulletScript.SetupBullet(range: weapon.projectileRange, damage: weapon.projectileDamage, trajectory: weapon.trajectory, powerRatio: direction.magnitude, sign: sign);
 
 			newBullet.transform.rotation = newRot;
 			newBullet.transform.position = ship.transform.FindChild ("BulletSpawn").position;

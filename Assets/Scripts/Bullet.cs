@@ -5,6 +5,7 @@ using UnityEngine;
 public class Bullet : MonoBehaviour {
 	public Weapon.Trajectory trajectory;
 	private float powerRatio = 1;
+	private int sign = 1;
 	private float xOffset = 0;
 	[Space(30)]
 	public Player localPlayer;
@@ -29,11 +30,12 @@ public class Bullet : MonoBehaviour {
 		}
 	}
 
-	public void SetupBullet (float range, int damage, Weapon.Trajectory trajectory, float powerRatio) {
+	public void SetupBullet (float range, int damage, Weapon.Trajectory trajectory, float powerRatio, int sign = 1) {
 		this.range = range;
 		this.damage = damage;
 		this.trajectory = trajectory;
 		this.powerRatio = powerRatio;
+		this.sign = sign;
 		percentLifetime = 0f;
 	}
 
@@ -45,7 +47,10 @@ public class Bullet : MonoBehaviour {
 		if (trajectory == Weapon.Trajectory.Wave) {
 			CalculateWaveOffset();
 			transform.GetChild(0).localPosition = new Vector3 (xOffset, 0, 0);
-		}
+		} else if (trajectory == Weapon.Trajectory.Curve) {
+			CalculateCurveOffset();
+			transform.GetChild(0).localPosition = new Vector3 (xOffset, 0, 0);
+		} 
 
 		if (distanceTraveled > range) {
 			if (masterBullet) {
@@ -58,6 +63,11 @@ public class Bullet : MonoBehaviour {
 
 	void CalculateWaveOffset () {
 		xOffset = 3 * Mathf.Sin(4f * percentLifetime * (1/powerRatio));
+	}
+
+	void CalculateCurveOffset () {
+		xOffset = ((100 * percentLifetime) * percentLifetime) / (4 * powerRatio) * sign;
+
 	}
 
 	void OnTriggerEnter2D (Collider2D col)
