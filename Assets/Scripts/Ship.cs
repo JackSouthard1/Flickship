@@ -47,6 +47,9 @@ public class Ship : MonoBehaviour {
 	Vector2 dragVector;
 	Vector2 dragVectorRefined;
 
+	private float sway = 0f;
+	private float swayStartTime;
+
 	const float shootRadius = 2f;
 	const float moveRadius = 5f;
 	const float dragRadiusMax = 6f;
@@ -110,6 +113,8 @@ public class Ship : MonoBehaviour {
 		localPlayer.camController.shipSelected = true;	
 
 		stage = Stage.LooseDrag;
+
+		sway = 0;
 	}
 
 	void ClickDown ()
@@ -150,6 +155,8 @@ public class Ship : MonoBehaviour {
 		transform.rotation = newRot;
 
 		if (stage == Stage.Shoot) {
+			CalculateSway();
+			shipHull.localRotation = Quaternion.Euler(new Vector3(0, 0, sway));
 			UpdateShootPath();
 			shootPath.gameObject.SetActive (true);
 		} else {
@@ -158,6 +165,7 @@ public class Ship : MonoBehaviour {
 
 		if (stage == Stage.Move) {
 			shipGhost.gameObject.SetActive(true);
+			shipHull.localRotation = Quaternion.Euler(Vector3.zero);
 		} else {
 			shipGhost.gameObject.SetActive(false);
 		}
@@ -177,7 +185,7 @@ public class Ship : MonoBehaviour {
 
 			localPlayer.HandleShipAction (shipNumber: shipNumber, direction: force, actionType: "Move");
 		} else if (stage == Stage.Shoot) {
-			Vector2 direction = dragVector.normalized;
+			Vector2 basicDirection = dragVector.normalized;
 			origionalRot = transform.rotation;
 
 			actionUnderway = true;
@@ -194,7 +202,10 @@ public class Ship : MonoBehaviour {
 			powerRatio = (-4f * powerRatio) * (powerRatio - 1f);
 			powerRatio = Mathf.Clamp(powerRatio, minPowerRatio, 1f);
 
-			localPlayer.HandleShipAction (shipNumber: shipNumber, direction: -direction * powerRatio, actionType: "Shoot", sign: sign);
+			Vector2 finalDirection = -basicDirection * powerRatio;
+			finalDirection = RotateVector2(finalDirection, sway);
+
+			localPlayer.HandleShipAction (shipNumber: shipNumber, direction: finalDirection, actionType: "Shoot", sign: sign);
 		} else if (stage == Stage.LooseDrag) {
 			transform.rotation = origionalRot;
 		}
@@ -236,6 +247,8 @@ public class Ship : MonoBehaviour {
 		float modifierRatio = 1;
 		int nodeCount = 2;
 
+		shootPath.transform.localRotation = Quaternion.Euler(new Vector3(0,0, sway));
+
 		Vector3[] pathVerts;
 		if (weapon.trajectory == Weapon.Trajectory.Wave) {
 			modifierRatio = (-4f * basicRatio) * (basicRatio - 1f);
@@ -254,13 +267,13 @@ public class Ship : MonoBehaviour {
 			for (int i = 0; i < pathVerts.Length; i++) {
 				float x = 3 * Mathf.Sin (4f * nodePercentageY [i] / modifierRatio);
 				Vector3 localPos = new Vector3 (x, (projectileRange * nodePercentageY [i] + shootPath.transform.localPosition.y), 0);
-				pathVerts [i] = transform.TransformPoint (localPos);
+				pathVerts [i] = shootPath.transform.TransformPoint (localPos);
 			}
 		} else if (weapon.trajectory == Weapon.Trajectory.Straight) {
 			shootPath.numPositions = 2;
 			pathVerts = new Vector3[2];
-			pathVerts [0] = shootPath.transform.position;
-			pathVerts [1] = transform.TransformPoint ((Vector3.up * projectileRange * modifierRatio) + shootPath.transform.localPosition);
+			pathVerts [0] = shootPath.transform.TransformPoint(shootPath.transform.localPosition);
+			pathVerts [1] = shootPath.transform.TransformPoint ((Vector3.up * projectileRange * modifierRatio) + shootPath.transform.localPosition);
 		} else {
 			modifierRatio = (-4f * basicRatio) * (basicRatio - 1f);
 			modifierRatio = Mathf.Clamp (modifierRatio, minPowerRatio, 1f);
@@ -287,9 +300,21 @@ public class Ship : MonoBehaviour {
 			for (int i = 0; i < pathVerts.Length; i++) {
 				float x = (100 * nodePercentageY[i] * nodePercentageY[i]) / (4 * modifierRatio);
 				Vector3 localPos = new Vector3 (x, (projectileRange * nodePercentageY [i] + shootPath.transform.localPosition.y), 0);
-				pathVerts [i] = transform.TransformPoint (localPos);
+				pathVerts [i] = shootPath.transform.TransformPoint (localPos);
 			}
 		}
 		shootPath.SetPositions (pathVerts);
+	}
+
+	private void CalculateSway ()
+	{
+		float timeRatio = (Time.time) / weapon.swayTime;
+		float refinedRatio = Mathf.Sin(2f * Mathf.PI * timeRatio);
+		sway = refinedRatio * weapon.maxSway;
+	}
+
+	private Vector2 RotateVector2 (Vector2 aPoint, float aDegree)
+	{
+	    return Quaternion.Euler(0,0, aDegree) * aPoint;
 	}
 }

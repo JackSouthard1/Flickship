@@ -13,5 +13,7 @@ public class Weapon {
 	public float projectileSpeed;
 	public float projectileRange;
 	public int projectileDamage;
+	public float maxSway;
+	public float swayTime;
 	public GameObject projectilePrefab;
 }
