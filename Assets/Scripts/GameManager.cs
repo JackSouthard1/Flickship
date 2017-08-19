@@ -31,6 +31,7 @@ public class GameManager : NetworkBehaviour {
 	public int astroidSizeMin;
 	public int astroidSizeMax;
 	public int astroidMaxY;
+	public float minAstroidDst;
 
 	[Space(10)]
 	public float astroidResolution;
@@ -48,6 +49,8 @@ public class GameManager : NetworkBehaviour {
 		if (allowDebugMatches) {
 			matchStarted = true;
 		}
+
+//		GenerateAstroids();
 	}
 
 	public override void OnStartServer ()
@@ -96,6 +99,7 @@ public class GameManager : NetworkBehaviour {
 	{
 		matchStarted = true;
 
+	
 		if (isServer) {
 			int[] colorIndexes = new int[2];
 			colorIndexes [0] = Random.Range (0, 4);
@@ -113,8 +117,8 @@ public class GameManager : NetworkBehaviour {
 			SetActionBarColor (colorIndexes[0]);
 			RpcSetActionBarColor(colorIndexes[1]);
 		}
-		Random.InitState(seed);
-		GenerateAstroids();
+	
+		GenerateAstroids(seed);
 	}
 
 	[ClientRpc]
@@ -245,13 +249,31 @@ public class GameManager : NetworkBehaviour {
 		rightBorder.GetComponent<BoxCollider2D>().size = new Vector2(1, mapData.mapHeight);
 	}
 
-	private void GenerateAstroids () {
+	private void GenerateAstroids (int seed)
+	{
+		Random.InitState(seed);
+
 		for (int i = 0; i < astroidCount; i++) {
-			float x = Random.Range(-mapData.mapWidth, mapData.mapWidth);
-			float y = Random.Range(-astroidMaxY, astroidMaxY);
+			float x = Random.Range (-mapData.mapWidth / 2, mapData.mapWidth / 2);
+			float y = Random.Range (-astroidMaxY, astroidMaxY);
 			Vector3 spawnPos = new Vector3 (x, y, 0);
-			float size = Random.Range(astroidSizeMin, astroidSizeMax);
-			SpawnAstroid(spawnPos, size);
+			float size = Random.Range (astroidSizeMin, astroidSizeMax);
+			SpawnAstroid (spawnPos, size);
+//			if (SafeSpawnPos(spawnPos, size)) {
+//				SpawnAstroid (spawnPos, size);
+//			} else {
+//				bool safeSpawn = false;
+//				while (!safeSpawn) {
+//					x = Random.Range(-mapData.mapWidth / 2, mapData.mapWidth / 2);
+//					y = Random.Range(-astroidMaxY, astroidMaxY);
+//					spawnPos = new Vector3 (x, y, 0);
+//
+//					safeSpawn = SafeSpawnPos(spawnPos, size);
+//					if (safeSpawn) {
+//						SpawnAstroid (spawnPos, size);
+//					}
+//				}
+//			}
 		}
 	}
 
@@ -273,6 +295,7 @@ public class GameManager : NetworkBehaviour {
 			float angleInRad = Mathf.Deg2Rad * (vertexAngles [i - 1]);
 
 			float vertexRadius = previousRadius + Random.Range (-maxVertexHeightDifference * size, maxVertexHeightDifference * size);
+			vertexRadius = Mathf.Clamp(vertexRadius, astroidSizeMin, size + (minAstroidDst / 2));
 
 			float angleVectorX = Mathf.Cos (angleInRad);
 			float angleVectorY = Mathf.Sin (angleInRad);
@@ -331,6 +354,21 @@ public class GameManager : NetworkBehaviour {
 //		}
 //		astroid.GetComponent<LineRenderer>().numPositions = vertexCount + 1;
 //		astroid.GetComponent<LineRenderer>().SetPositions(lrPath);
+	}
+
+	private bool SafeSpawnPos (Vector3 pos, float size)
+	{
+		Vector2 pos2d = new Vector2 (pos.x, pos.y);
+		Collider2D[] cols = Physics2D.OverlapCircleAll (pos2d, size);
+
+		for (int i = 0; i < cols.Length; i++) {
+			if (cols [i].gameObject.tag == "Ship") {
+				return false;
+				print ("Not safe spawn");
+			}
+		}
+
+		return true;
 	}
 }
 

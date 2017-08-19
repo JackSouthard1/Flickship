@@ -96,7 +96,7 @@ public class Ship : MonoBehaviour {
 
 	private void OnMouseDown ()
 	{
-		if (stage != Stage.Idle || Input.mousePosition.y < shipSelectionZoneY || localPlayer.actionState != Player.ActionUnderway.None || gm.activePlayer != assignedPlayerNumber || !gm.matchStarted) {
+		if (stage != Stage.Idle || Input.mousePosition.y < shipSelectionZoneY || localPlayer.actionState != Player.ActionUnderway.None || gm.activePlayer != assignedPlayerNumber || !gm.matchStarted || !localPlayer.myTurn) {
 			return;
 		}
 
