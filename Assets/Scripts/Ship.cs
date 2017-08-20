@@ -320,10 +320,15 @@ public class Ship : MonoBehaviour {
 
 	void LateUpdate ()
 	{
+		if (rb.velocity != Vector2.zero || rb.angularVelocity != 0 || stage != Stage.Idle) {
+			UpdateFOV();
+		}
+	}
+
+	public void UpdateFOV ()
+	{
 		if (fov.enabled == true) {
-			if (rb.velocity != Vector2.zero || rb.angularVelocity != 0 || stage != Stage.Idle) {
-				fov.UpdateFOV ();
-			}
+			fov.UpdateFOV ();
 		}
 	}
 }

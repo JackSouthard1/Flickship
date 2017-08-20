@@ -16,12 +16,10 @@ public class ActionBar : MonoBehaviour {
 	int actionsLeft = 0;
 
 	float width;
-	float height;
 
 	void Start () {
 		rectTransform = GetComponent<RectTransform>();
 		width = rectTransform.rect.width;
-		height = rectTransform.rect.height;
 
 		UpdateUI();
 	}
@@ -45,7 +43,6 @@ public class ActionBar : MonoBehaviour {
 	}
 
 	void UpdateUI () {
-		float actionsUsed = maxActions - actionsLeft;
 		float newWidth = actionsLeft * (width / maxActions) - width;
 		fill.offsetMax = new Vector2 (newWidth, fill.offsetMax.y);
 	}

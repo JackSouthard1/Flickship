@@ -155,6 +155,8 @@ public class Player : NetworkBehaviour {
 
 			actionState = ActionUnderway.ShootAction;
 		}
+
+		ship.GetComponent<Ship>().UpdateFOV();
 	}
 
 	public void HandleBulletHit (GameObject hit, int parentShipNumber, int damage)

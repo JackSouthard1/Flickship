@@ -170,6 +170,7 @@ public class GameManager : NetworkBehaviour {
 		ships[shipNumber].transform.rotation = newRot;
 		ships[shipNumber].GetComponent<Rigidbody2D>().angularVelocity = 0;
 		ships[shipNumber].GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+		ships[shipNumber].GetComponent<Ship>().UpdateFOV();
 	}
 
 	public GameObject GetShipWithShipNumber (int shipNumber)
