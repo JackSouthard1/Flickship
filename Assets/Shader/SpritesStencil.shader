@@ -1,4 +1,6 @@
-﻿Shader "Custom/SpritesStencil"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Custom/SpritesStencil"
 {
     Properties
     {
@@ -35,7 +37,7 @@
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ PIXELSNAP_ON
-            #pragma shader_feature ETC1_EXTERNAL_ALPHA
+//            #pragma shader_feature ETC1_EXTERNAL_ALPHA
             #include "UnityCG.cginc"
            
             struct appdata_t
@@ -57,7 +59,7 @@
             v2f vert(appdata_t IN)
             {
                 v2f OUT;
-                OUT.vertex = mul(UNITY_MATRIX_MVP, IN.vertex);
+                OUT.vertex = UnityObjectToClipPos(IN.vertex);
                 OUT.texcoord = IN.texcoord;
                 OUT.color = IN.color * _Color;
                 #ifdef PIXELSNAP_ON

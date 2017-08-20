@@ -64,9 +64,9 @@ public class Ship : MonoBehaviour {
 	{
 		gm = GameObject.Find ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
-		shipHull = transform.FindChild ("ShipHull");
-		shipGhost = transform.FindChild ("ShipGhost");
-		shootPath = transform.FindChild("ShootPath").GetComponent<LineRenderer>();
+		shipHull = transform.Find ("ShipHull");
+		shipGhost = transform.Find ("ShipGhost");
+		shootPath = transform.Find("ShootPath").GetComponent<LineRenderer>();
 		cam = GameObject.Find ("Main Camera").GetComponent<Camera> ();
 	}
 	
@@ -253,7 +253,7 @@ public class Ship : MonoBehaviour {
 			modifierRatio = Mathf.Clamp (modifierRatio, minPowerRatio, 1f);
 
 			nodeCount = Mathf.RoundToInt (shootPathResolution * projectileRange);
-			shootPath.numPositions = nodeCount;
+			shootPath.positionCount = nodeCount;
 
 			float nodeIncriment = 1f / nodeCount;
 			float[] nodePercentageY = new float[nodeCount];
@@ -268,7 +268,7 @@ public class Ship : MonoBehaviour {
 				pathVerts [i] = shootPath.transform.TransformPoint (localPos);
 			}
 		} else if (weapon.trajectory == Weapon.Trajectory.Straight) {
-			shootPath.numPositions = 2;
+			shootPath.positionCount = 2;
 			pathVerts = new Vector3[2];
 			pathVerts [0] = shootPath.transform.TransformPoint(shootPath.transform.localPosition);
 			pathVerts [1] = shootPath.transform.TransformPoint ((Vector3.up * projectileRange * modifierRatio) + shootPath.transform.localPosition);
@@ -286,7 +286,7 @@ public class Ship : MonoBehaviour {
 			modifierRatio = modifierRatio * sign;
 
 			nodeCount = Mathf.RoundToInt (shootPathResolution * projectileRange);
-			shootPath.numPositions = nodeCount;
+			shootPath.positionCount = nodeCount;
 
 			float nodeIncriment = 1f / nodeCount;
 			float[] nodePercentageY = new float[nodeCount];

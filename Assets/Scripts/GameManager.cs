@@ -39,7 +39,7 @@ public class GameManager : NetworkBehaviour {
 
 	void Start ()
 	{
-		actionBar = GameObject.Find ("Canvas").transform.FindChild ("ActionBar").GetComponent<ActionBar> ();
+		actionBar = GameObject.Find ("Canvas").transform.Find ("ActionBar").GetComponent<ActionBar> ();
 
 		menu.SetActive (false);
 		if (isServer) {
@@ -124,8 +124,8 @@ public class GameManager : NetworkBehaviour {
 	[ClientRpc]
 	public void RpcSetShipColor (int shipNumber, int colorIndex)
 	{	
-		ships[shipNumber].transform.FindChild("ShipHull").GetComponent<SpriteRenderer>().color = playerColors[colorIndex];
-		ships[shipNumber].transform.FindChild("ShipGhost").GetComponent<SpriteRenderer>().color = playerColors[colorIndex];
+		ships[shipNumber].transform.Find("ShipHull").GetComponent<SpriteRenderer>().color = playerColors[colorIndex];
+		ships[shipNumber].transform.Find("ShipGhost").GetComponent<SpriteRenderer>().color = playerColors[colorIndex];
 	}
 
 	[ClientRpc]
@@ -137,8 +137,8 @@ public class GameManager : NetworkBehaviour {
 	}
 
 	private void SetActionBarColor (int colorIndex) {
-		actionBar.transform.FindChild("Fill").GetComponent<Image>().color = playerColors[colorIndex];
-		actionBar.transform.FindChild("Background").GetComponent<Image>().color = playerColors[colorIndex];
+		actionBar.transform.Find("Fill").GetComponent<Image>().color = playerColors[colorIndex];
+		actionBar.transform.Find("Background").GetComponent<Image>().color = playerColors[colorIndex];
 	}
 
 	[Command]
@@ -231,10 +231,10 @@ public class GameManager : NetworkBehaviour {
 
 	private void SetupBorders () {
 		Transform borderContainer = GameObject.Find("Borders").transform;
-		GameObject topBorder 	= borderContainer.FindChild("TopBorder")	.gameObject;
-		GameObject bottomBorder = borderContainer.FindChild("BottomBorder")	.gameObject;
-		GameObject leftBorder 	= borderContainer.FindChild("LeftBorder")	.gameObject;
-		GameObject rightBorder	= borderContainer.FindChild("RightBorder")	.gameObject;
+		GameObject topBorder 	= borderContainer.Find("TopBorder")	.gameObject;
+		GameObject bottomBorder = borderContainer.Find("BottomBorder")	.gameObject;
+		GameObject leftBorder 	= borderContainer.Find("LeftBorder")	.gameObject;
+		GameObject rightBorder	= borderContainer.Find("RightBorder")	.gameObject;
 
 		topBorder.transform.position = new Vector3(0, mapData.mapHeight / 2, 0f);
 		topBorder.GetComponent<BoxCollider2D>().size = new Vector2(mapData.mapWidth, 1);
@@ -352,7 +352,7 @@ public class GameManager : NetworkBehaviour {
 			}
 
 		}
-		astroid.GetComponent<LineRenderer>().numPositions = vertexCount + 1;
+		astroid.GetComponent<LineRenderer>().positionCount = vertexCount + 1;
 		astroid.GetComponent<LineRenderer>().SetPositions(lrPath);
 	}
 
