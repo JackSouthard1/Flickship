@@ -45,7 +45,7 @@ public class CameraController : MonoBehaviour {
 			if (Input.GetMouseButton (0)) {
 				if (lastPosition != null) {
 					Vector3 delta = (Input.mousePosition - lastPosition);
-					momentum = delta * speed;
+					momentum = delta * speed * (cam.orthographicSize / 30);
 				}
 			}
 
