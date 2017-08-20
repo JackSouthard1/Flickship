@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class FieldOfView : MonoBehaviour {
+	private Rigidbody2D rb;
+	
 	public float viewRadius;
 	[Range(0,363)]
 	public float viewAngle;
@@ -22,10 +24,13 @@ public class FieldOfView : MonoBehaviour {
 	Mesh viewMesh;
 
 	void Start () {
+		rb = gameObject.GetComponent<Rigidbody2D>();
 		viewMesh = new Mesh();
 		viewMesh.name = "View Mesh";
 		viewMeshFilter.mesh = viewMesh;
 		StartCoroutine("FindTargetsWithDelay", 0.2f);
+
+		DrawFieldOfView ();
 	}
 
 	IEnumerator FindTargetsWithDelay (float delay)
@@ -36,8 +41,11 @@ public class FieldOfView : MonoBehaviour {
 		}
 	}
 
-	void LateUpdate () {
-		DrawFieldOfView();
+	void LateUpdate ()
+	{
+		if (rb.velocity != Vector2.zero) {
+			DrawFieldOfView ();
+		}
 	}
 
 	void FindVisibleTargets ()
