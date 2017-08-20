@@ -18,6 +18,7 @@ public class GameManager : NetworkBehaviour {
 	public GameObject menu;
 
 	ActionBar actionBar;
+	GameObject waitingText;
 
 	[SerializeField]
 	public Color[] playerColors;
@@ -40,6 +41,7 @@ public class GameManager : NetworkBehaviour {
 	void Start ()
 	{
 		actionBar = GameObject.Find ("Canvas").transform.Find ("ActionBar").GetComponent<ActionBar> ();
+		waitingText = GameObject.Find ("Canvas").transform.Find ("WaitingText").gameObject;
 
 		menu.SetActive (false);
 		if (isServer) {
@@ -118,6 +120,7 @@ public class GameManager : NetworkBehaviour {
 			RpcSetActionBarColor(colorIndexes[1]);
 		}
 
+		waitingText.SetActive(false);
 		actionBar.Enable();
 		localPlayer.SetupUI();
 		GenerateAstroids(seed);
