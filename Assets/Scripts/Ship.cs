@@ -23,6 +23,7 @@ public class Ship : MonoBehaviour {
 	private Stage stage = Stage.Idle;
 
 	[Space(50)]
+	[Header("Non Editable")]
 	public int assignedPlayerNumber;
 	public int shipNumber;
 	public Player localPlayer;

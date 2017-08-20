@@ -20,7 +20,12 @@ public class ActionBar : MonoBehaviour {
 	void Start () {
 		rectTransform = GetComponent<RectTransform>();
 		width = rectTransform.rect.width;
+	}
 
+	public void Enable ()
+	{
+		background.GetComponent<Image>().enabled = true;
+		fill.GetComponent<Image>().enabled = true;
 		UpdateUI();
 	}
 

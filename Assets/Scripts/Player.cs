@@ -67,7 +67,6 @@ public class Player : NetworkBehaviour {
 		if (isLocalPlayer) {
 			gm.SetupScene();
 			camController.SetTarget(assignedShips[0].transform.position);
-			SetupUI();
 
 			if (playerNumber == 1) {
 				camController.FlipCamera();
@@ -238,7 +237,7 @@ public class Player : NetworkBehaviour {
 		actionState = ActionUnderway.None;
 	}
 
-	private void SetupUI ()
+	public void SetupUI ()
 	{
 		UpdateUI();
 		PositionViews();

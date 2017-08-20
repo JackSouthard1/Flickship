@@ -117,7 +117,9 @@ public class GameManager : NetworkBehaviour {
 			SetActionBarColor (colorIndexes[0]);
 			RpcSetActionBarColor(colorIndexes[1]);
 		}
-	
+
+		actionBar.Enable();
+		localPlayer.SetupUI();
 		GenerateAstroids(seed);
 	}
 
