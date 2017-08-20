@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class Ship : MonoBehaviour {
 
+	private FieldOfView fov;
 	[Header("Ship Settings")]
 	public float thrust;
 	public int health;
@@ -62,6 +63,7 @@ public class Ship : MonoBehaviour {
 
 	void Start ()
 	{
+		fov = GetComponent<FieldOfView>();
 		gm = GameObject.Find ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
 		shipHull = transform.Find ("ShipHull");
@@ -314,5 +316,12 @@ public class Ship : MonoBehaviour {
 	private Vector2 RotateVector2 (Vector2 aPoint, float aDegree)
 	{
 	    return Quaternion.Euler(0,0, aDegree) * aPoint;
+	}
+
+	void LateUpdate ()
+	{
+		if (rb.velocity != Vector2.zero || rb.angularVelocity != 0 || stage != Stage.Idle) {
+			fov.UpdateFOV ();
+		}
 	}
 }

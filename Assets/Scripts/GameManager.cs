@@ -364,7 +364,6 @@ public class GameManager : NetworkBehaviour {
 		for (int i = 0; i < cols.Length; i++) {
 			if (cols [i].gameObject.tag == "Ship") {
 				return false;
-				print ("Not safe spawn");
 			}
 		}
 

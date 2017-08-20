@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class FieldOfView : MonoBehaviour {
 	private Rigidbody2D rb;
+
+	private bool initalFOVSet = false;
 	
 	public float viewRadius;
 	[Range(0,363)]
@@ -23,14 +25,22 @@ public class FieldOfView : MonoBehaviour {
 	public MeshFilter viewMeshFilter;
 	Mesh viewMesh;
 
-	void Start () {
+	void Awake () {
 		rb = gameObject.GetComponent<Rigidbody2D>();
 		viewMesh = new Mesh();
 		viewMesh.name = "View Mesh";
 		viewMeshFilter.mesh = viewMesh;
 		StartCoroutine("FindTargetsWithDelay", 0.2f);
+	}
 
-		DrawFieldOfView ();
+	void Update ()
+	{
+		if (!initalFOVSet) {
+			if (GameObject.FindGameObjectWithTag ("Astroid") != null) {
+				DrawFieldOfView();
+				initalFOVSet = true;
+			}
+		}
 	}
 
 	IEnumerator FindTargetsWithDelay (float delay)
@@ -41,11 +51,8 @@ public class FieldOfView : MonoBehaviour {
 		}
 	}
 
-	void LateUpdate ()
-	{
-		if (rb.velocity != Vector2.zero) {
-			DrawFieldOfView ();
-		}
+	public void UpdateFOV() {
+		DrawFieldOfView ();
 	}
 
 	void FindVisibleTargets ()

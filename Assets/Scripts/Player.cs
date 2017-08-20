@@ -16,7 +16,6 @@ public class Player : NetworkBehaviour {
 	public bool myTurn = false;
 
 	public int playerNumber;
-//	public int playerColorIndex = -1;
 
 	public int actionsDone = 0;
 	GameManager gm;
