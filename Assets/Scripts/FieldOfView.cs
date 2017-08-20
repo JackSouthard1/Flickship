@@ -30,10 +30,14 @@ public class FieldOfView : MonoBehaviour {
 		viewMesh = new Mesh();
 		viewMesh.name = "View Mesh";
 		viewMeshFilter.mesh = viewMesh;
+	}
+
+	void Start ()
+	{
 		StartCoroutine("FindTargetsWithDelay", 0.2f);
 	}
 
-	void Update ()
+	void LateUpdate ()
 	{
 		if (!initalFOVSet) {
 			if (GameObject.FindGameObjectWithTag ("Astroid") != null) {
