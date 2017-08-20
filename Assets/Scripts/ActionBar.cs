@@ -28,13 +28,20 @@ public class ActionBar : MonoBehaviour {
 
 	public void TurnStart () {
 		actionsLeft = maxActions;
+		fill.gameObject.SetActive(true);
+		background.gameObject.SetActive(true);		
 		UpdateUI ();
 	}
 
 	public void ActionUsed ()
 	{
 		actionsLeft = actionsLeft - 1;
-		UpdateUI ();
+		if (actionsLeft <= 0) {
+			fill.gameObject.SetActive(false);
+			background.gameObject.SetActive(false);		
+		} else {
+			UpdateUI ();
+		}
 	}
 
 	void UpdateUI () {
