@@ -14,6 +14,7 @@ public class Player : NetworkBehaviour {
 	};
 	public ActionUnderway actionState = ActionUnderway.None;
 	public bool myTurn = false;
+	private bool waitingForUI = false;
 
 	public int playerNumber;
 
@@ -239,8 +240,15 @@ public class Player : NetworkBehaviour {
 
 	public void SetupUI ()
 	{
-		UpdateUI();
-		PositionViews();
+		waitingForUI = true;
+	}
+
+	void Update () {
+		if (waitingForUI && assignedShips.Count > 0) {
+			UpdateUI ();
+			PositionViews ();
+			waitingForUI = false;
+		}
 	}
 
 	private void UpdateUI ()

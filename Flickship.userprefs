@@ -1,15 +1,11 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/GameManager.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Player.cs">
     <Files>
-      <File FileName="Assets/Scripts/GameManager.cs" Line="121" Column="26" />
-      <File FileName="Assets/Scripts/Player.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Ship.cs" Line="104" Column="12" />
-      <File FileName="Assets/Scripts/Bullet.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/FieldOfView.cs" Line="33" Column="18" />
-      <File FileName="Assets/Scripts/Weapon.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/ActionBar.cs" Line="32" Column="39" />
-      <File FileName="Assets/Shader/SpritesStencil.shader" Line="40" Column="49" />
+      <File FileName="Assets/Scripts/GameManager.cs" Line="125" Column="22" />
+      <File FileName="Assets/Scripts/Player.cs" Line="248" Column="16" />
+      <File FileName="Assets/Scripts/Ship.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/ActionBar.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
