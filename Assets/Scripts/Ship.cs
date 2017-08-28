@@ -62,8 +62,12 @@ public class Ship : MonoBehaviour {
 
 	private Quaternion origionalRot;
 
+	private CircleCollider2D clickTrigger;
+	private float selectionSizeRatio = 0.2f;
+
 	void Start ()
 	{
+		clickTrigger = transform.Find("SelectionZone").GetComponent<CircleCollider2D> ();
 		fov = GetComponent<FieldOfView>();
 		gm = GameObject.Find ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
@@ -100,6 +104,8 @@ public class Ship : MonoBehaviour {
 				}
 			}
 		}
+
+		SetSelectionZone ();
 	}
 
 	private void OnMouseDown ()
@@ -332,5 +338,10 @@ public class Ship : MonoBehaviour {
 		if (fov.enabled == true) {
 			fov.UpdateFOV ();
 		}
+	}
+
+	private void SetSelectionZone () {
+		float camSize = cam.orthographicSize;
+		clickTrigger.radius = camSize * selectionSizeRatio;
 	}
 }
