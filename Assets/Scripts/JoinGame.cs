@@ -48,7 +48,7 @@ public class JoinGame : MonoBehaviour {
 
 		foreach (MatchInfoSnapshot matchInfo in matches) {
 			GameObject roomListItemGO = Instantiate (roomListItemPrefab);
-			roomListItemGO.transform.parent = roomListParent;
+			roomListItemGO.transform.SetParent(roomListParent);
 
 			RoomListItem _roomListItem = roomListItemGO.GetComponent<RoomListItem> ();
 			if (_roomListItem != null) {
@@ -72,6 +72,7 @@ public class JoinGame : MonoBehaviour {
     }
 
     public void JoinRoom (MatchInfoSnapshot _matchInfo) {
+		print ("Joining Room");
     	networkManager.matchMaker.JoinMatch(_matchInfo.networkId, "", "", "", 0, 0, networkManager.OnMatchJoined);
     	ClearRoomList();
     	status.text = "Joining";
