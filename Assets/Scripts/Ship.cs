@@ -209,6 +209,7 @@ public class Ship : MonoBehaviour {
 			localPlayer.HandleShipAction (shipNumber: shipNumber, direction: finalDirection, actionType: "Shoot", sign: sign);
 		} else if (stage == Stage.LooseDrag) {
 			transform.rotation = origionalRot;
+			UpdateFOV ();
 		}
 
 		stage = Stage.Idle;
