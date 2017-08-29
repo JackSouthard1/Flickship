@@ -44,8 +44,6 @@ public class CameraController : MonoBehaviour {
 
 	private float padding = 10f;
 
-	public List<Transform> visableShips = new List<Transform>();
-
 	void Start () 
 	{
 		cam = gameObject.GetComponent<Camera>();
@@ -58,19 +56,6 @@ public class CameraController : MonoBehaviour {
 		if (!EventSystem.current.IsPointerOverGameObject () && !shipSelected) {
 
 			CheckForTouches ();
-
-			if (Input.GetMouseButtonDown (0)) {
-				actionZoom = false;
-				momentum = Vector3.zero;
-				target = Vector3.up;
-			}
-
-			if (Input.GetMouseButton (0)) {
-				if (lastPosition != null) {
-					Vector3 delta = (Input.mousePosition - lastPosition);
-					momentum = delta * speed * (cam.orthographicSize / 30);
-				}
-			}
 
 			if (momentum != Vector3.zero) {
 				transform.position += momentum;
@@ -85,15 +70,22 @@ public class CameraController : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.Minus)) {
 			cam.orthographicSize += zoomIntervals;
 		}
+
+		if (actionZoom) {
+			CalculateActionZoom ();
+		}
 	}
 
 	void CheckForTouches () {
-		if (Input.touchCount == 2)
+		if (Input.touchCount == 2) {
+			actionZoom = false;
 			CheckForPinchZoom ();
-		else if (Input.touchCount == 1 || Input.GetMouseButton(0))
+		} else if (Input.touchCount == 1 || Input.GetMouseButton (0)) {
+			actionZoom = false;
 			CheckForScroll ();
-		else
+		} else {
 			currentState = MovementState.None;
+		}
 	}
 
 	void CheckForScroll () {
@@ -132,10 +124,6 @@ public class CameraController : MonoBehaviour {
 		cam.orthographicSize = Mathf.Max(cam.orthographicSize, 0.1f);
 
 		lastPosition = Input.mousePosition;
-
-		if (actionZoom) {
-			CalculateActionZoom ();
-		}
 	}
 
 	private bool mouseOverGameObject ()
@@ -196,6 +184,8 @@ public class CameraController : MonoBehaviour {
 	}
 
 	private void CalculateActionZoom () {
+		List<Transform> visableShips = localPlayer.visableShips;
+
 		if (visableShips.Count == 0) {
 			return;
 		}
@@ -244,12 +234,5 @@ public class CameraController : MonoBehaviour {
 		}
 
 		cam.orthographicSize = halfHeight;
-	}
-		
-	public void AddVisableShips (List<Transform> newVisableShips) {
-		for (int i = 0; i < newVisableShips.Count; i++) {
-			visableShips.Add (newVisableShips [i]);
-		}
-		visableShips = visableShips.Distinct().ToList();
 	}
 }

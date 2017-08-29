@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using System.Linq;
 
 public class Player : NetworkBehaviour {
 
@@ -30,6 +31,10 @@ public class Player : NetworkBehaviour {
 	public GameObject zoomButtonPrefab;
 	private GameObject zoomButton;
 	private List<GameObject> views;
+
+	public List<Transform> visableShips = new List<Transform>();
+
+	private bool spawnedZoomButton = false;
 
 	void Start ()
 	{
@@ -252,13 +257,17 @@ public class Player : NetworkBehaviour {
 			PositionViews ();
 			waitingForUI = false;
 		}
+
+		RequestVisableShips ();
 	}
 
 	private void UpdateUI ()
 	{
-		if (GameObject.Find ("Canvas").transform.Find ("ZoomButton") == null) {
+		if (!spawnedZoomButton) {
 			zoomButton = (GameObject)Instantiate (zoomButtonPrefab, Vector3.zero, Quaternion.identity, GameObject.Find ("Canvas").transform);
 			zoomButton.GetComponent<Button>().onClick.AddListener(() => camController.EnterActionZoom());
+
+			spawnedZoomButton = true;
 		}
 
 		if (views != null) {
@@ -300,15 +309,20 @@ public class Player : NetworkBehaviour {
 		}
 
 	}
-
-	private void UpdateViewStates () {
-//		for (int i = 0; i < shipViews.Count; i++) {
-//			shipViews[i].transform.rotation = assignedShips[i].transform.FindChild("ShipHull").rotation;
-//		}
-	}
-
+		
 	public void ShipViewClicked (int buttonShipNumber)
 	{
 		camController.SetTarget(assignedShips[buttonShipNumber].transform.position);
+	}
+
+	private void RequestVisableShips () {
+		visableShips.Clear ();
+
+		for (int i = 0; i < assignedShips.Count; i++) {
+			visableShips.AddRange (assignedShips [i].GetComponent<FieldOfView> ().visibleShips);
+		}
+
+		// Remove duplicants
+		visableShips = visableShips.Distinct().ToList();
 	}
 }

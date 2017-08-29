@@ -81,8 +81,6 @@ public class FieldOfView : MonoBehaviour {
 				}
 			}
 		}
-
-		ship.SendVisibleShips (visibleShips);
 	}
 
 	void DrawFieldOfView ()

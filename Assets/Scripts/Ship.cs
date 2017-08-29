@@ -110,6 +110,9 @@ public class Ship : MonoBehaviour {
 
 	private void OnMouseDown ()
 	{
+		if (!controllable) {
+			return;
+		}
 		if (stage != Stage.Idle || Input.mousePosition.y < shipSelectionZoneY || localPlayer.actionState != Player.ActionUnderway.None || gm.activePlayer != assignedPlayerNumber || !gm.matchStarted || !localPlayer.myTurn) {
 			return;
 		}
@@ -343,9 +346,5 @@ public class Ship : MonoBehaviour {
 	private void SetSelectionZone () {
 		float camSize = cam.orthographicSize;
 		clickTrigger.radius = camSize * selectionSizeRatio;
-	}
-
-	public void SendVisibleShips (List<Transform> visableShips) {
-		localPlayer.camController.AddVisableShips (visableShips);
 	}
 }
