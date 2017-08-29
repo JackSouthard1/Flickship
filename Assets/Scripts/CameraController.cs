@@ -37,15 +37,14 @@ public class CameraController : MonoBehaviour {
 
 	private float zoomIntervals = 10f;
 
-<<<<<<< HEAD
+
 	private float zoomSpeed = 0.5f;
 
 	MovementState currentState;
-=======
+
 	private float padding = 10f;
 
 	public List<Transform> visableShips = new List<Transform>();
->>>>>>> 1e4a94f324354342db280c9cebee3dda224c148b
 
 	void Start () 
 	{
@@ -57,9 +56,9 @@ public class CameraController : MonoBehaviour {
 	void Update ()
 	{
 		if (!EventSystem.current.IsPointerOverGameObject () && !shipSelected) {
-<<<<<<< HEAD
+
 			CheckForTouches ();
-=======
+
 			if (Input.GetMouseButtonDown (0)) {
 				actionZoom = false;
 				momentum = Vector3.zero;
@@ -72,7 +71,6 @@ public class CameraController : MonoBehaviour {
 					momentum = delta * speed * (cam.orthographicSize / 30);
 				}
 			}
->>>>>>> 1e4a94f324354342db280c9cebee3dda224c148b
 
 			if (momentum != Vector3.zero) {
 				transform.position += momentum;
@@ -131,15 +129,13 @@ public class CameraController : MonoBehaviour {
 
 		cam.orthographicSize += deltaMagnitudeDiff * zoomSpeed;
 
-<<<<<<< HEAD
 		cam.orthographicSize = Mathf.Max(cam.orthographicSize, 0.1f);
-=======
+
 		lastPosition = Input.mousePosition;
 
 		if (actionZoom) {
 			CalculateActionZoom ();
 		}
->>>>>>> 1e4a94f324354342db280c9cebee3dda224c148b
 	}
 
 	private bool mouseOverGameObject ()
