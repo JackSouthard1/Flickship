@@ -21,7 +21,6 @@ ExportedObj/*
 *.unityproj
 *.booproj
 *.log
-*.meta
 # Ignore UnityVS so users can use different versions
 Assets/UnityVS/*
 
