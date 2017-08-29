@@ -2,10 +2,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using System.Linq;
 
 public class CameraController : MonoBehaviour {
 
 	public bool shipSelected = false;
+
+	private bool actionZoom = false;
 
 	public float interpVelocity;
 	public float minDistance;
@@ -28,6 +31,10 @@ public class CameraController : MonoBehaviour {
 
 	private float zoomIntervals = 10f;
 
+	private float padding = 10f;
+
+	public List<Transform> visableShips = new List<Transform>();
+
 	void Start () 
 	{
 		cam = gameObject.GetComponent<Camera>();
@@ -38,6 +45,7 @@ public class CameraController : MonoBehaviour {
 	{
 		if (!EventSystem.current.IsPointerOverGameObject () && !shipSelected) {
 			if (Input.GetMouseButtonDown (0)) {
+				actionZoom = false;
 				momentum = Vector3.zero;
 				target = Vector3.up;
 			}
@@ -64,6 +72,10 @@ public class CameraController : MonoBehaviour {
 		}
 
 		lastPosition = Input.mousePosition;
+
+		if (actionZoom) {
+			CalculateActionZoom ();
+		}
 	}
 
 	private bool mouseOverGameObject ()
@@ -117,5 +129,67 @@ public class CameraController : MonoBehaviour {
 			elapsedTime += Time.deltaTime;
 			yield return new WaitForEndOfFrame ();
 		}
+	}
+
+	public void EnterActionZoom () {
+		actionZoom = true;
+	}
+
+	private void CalculateActionZoom () {
+		if (visableShips.Count == 0) {
+			return;
+		}
+
+		float minX = Mathf.Infinity;
+		float maxX = -Mathf.Infinity;
+		float minY = Mathf.Infinity;
+		float maxY = -Mathf.Infinity;
+
+		for (int i = 0; i < visableShips.Count; i++) {
+			Vector2 pos2d = new Vector2 (visableShips [i].position.x, visableShips [i].position.y);
+			if (pos2d.x < minX) {
+				minX = pos2d.x;
+			}
+			if (pos2d.y < minY) {
+				minY = pos2d.y;
+			}
+			if (pos2d.x > maxX) {
+				maxX = pos2d.x;
+			}
+			if (pos2d.y > maxY) {
+				maxY = pos2d.y;
+			}
+		}
+		minX -= padding;
+		maxX += padding;
+		minY -= padding;
+		maxY += padding;
+
+		float xDiff = maxX - minX;
+		float yDiff = maxY - minY;
+
+		// Calculate Center
+		Vector3 center = new Vector3(xDiff/2 + minX, yDiff/2 + minY, 0);
+		SetTarget (center);
+
+		float screenAspect = cam.aspect;
+		float shipAspect = xDiff / yDiff;
+
+		float halfHeight;
+
+		if (shipAspect > screenAspect) {
+			halfHeight = (xDiff / screenAspect) / 2;
+		} else {
+			halfHeight = yDiff / 2;
+		}
+
+		cam.orthographicSize = halfHeight;
+	}
+		
+	public void AddVisableShips (List<Transform> newVisableShips) {
+		for (int i = 0; i < newVisableShips.Count; i++) {
+			visableShips.Add (newVisableShips [i]);
+		}
+		visableShips = visableShips.Distinct().ToList();
 	}
 }

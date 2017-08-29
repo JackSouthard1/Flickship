@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class FieldOfView : MonoBehaviour {
+	private Ship ship;
 	private Rigidbody2D rb;
 
 	private bool initalFOVSet = false;
@@ -14,7 +15,7 @@ public class FieldOfView : MonoBehaviour {
 	public LayerMask targetMask;
 	public LayerMask obstacleMask;
 
-	public List<Transform> visibleTargets = new List<Transform>();
+	public List<Transform> visibleShips = new List<Transform>();
 
 	public float meshResolution;
 	public int edgeResolveIterations;
@@ -34,6 +35,7 @@ public class FieldOfView : MonoBehaviour {
 
 	void Start ()
 	{
+		ship = GetComponent<Ship> ();
 		StartCoroutine("FindTargetsWithDelay", 0.2f);
 	}
 
@@ -51,7 +53,7 @@ public class FieldOfView : MonoBehaviour {
 	{
 		while (true) {
 			yield return new WaitForSeconds (delay);
-			FindVisibleTargets();
+			FindVisibleShips();
 		}
 	}
 
@@ -59,14 +61,14 @@ public class FieldOfView : MonoBehaviour {
 		DrawFieldOfView ();
 	}
 
-	void FindVisibleTargets ()
+	void FindVisibleShips ()
 	{
-		visibleTargets.Clear();
+		visibleShips.Clear();
 
-		Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll (new Vector2 (transform.position.x, transform.position.y), viewRadius, targetMask);
+		Collider2D[] shipsInViewRadius = Physics2D.OverlapCircleAll (new Vector2 (transform.position.x, transform.position.y), viewRadius, targetMask);
 
-		for (int i = 0; i < targetsInViewRadius.Length; i++) {
-			Transform target = targetsInViewRadius [i].transform;
+		for (int i = 0; i < shipsInViewRadius.Length; i++) {
+			Transform target = shipsInViewRadius [i].transform;
 			Vector2 targetPos2d = new Vector2(target.transform.position.x, target.transform.position.y);
 			Vector2 pos2d = new Vector2 (transform.position.x, transform.position.y);
 
@@ -75,10 +77,12 @@ public class FieldOfView : MonoBehaviour {
 				float disToTarget = Vector2.Distance(pos2d, targetPos2d);
 
 				if (!Physics2D.Raycast(pos2d, dirToTarget, disToTarget, obstacleMask)) {
-					visibleTargets.Add(target);
+					visibleShips.Add(target);
 				}
 			}
 		}
+
+		ship.SendVisibleShips (visibleShips);
 	}
 
 	void DrawFieldOfView ()
