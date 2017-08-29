@@ -352,9 +352,9 @@ public class GameManager : NetworkBehaviour {
 		Vector3[] lrPath = new Vector3[vertexCount + 1];
 		for (int i = 0; i < lrPath.Length; i++) {
 			if (i == vertexCount) {
-				lrPath[i] = new Vector3 (colPath [0].x, colPath [0].y, 0);
+				lrPath[i] = new Vector3 (colPath [0].x, colPath [0].y, -1);
 			} else {
-				lrPath [i] = new Vector3 (colPath [i].x, colPath [i].y, 0);
+				lrPath [i] = new Vector3 (colPath [i].x, colPath [i].y, -1);
 			}
 
 		}
