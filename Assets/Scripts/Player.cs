@@ -27,13 +27,16 @@ public class Player : NetworkBehaviour {
 
 	private const float viewSpacing = 40f;
 	private GameObject shipViewPrefab;
-	private List<GameObject> shipViews;
+	public GameObject zoomButtonPrefab;
+	private GameObject zoomButton;
+	private List<GameObject> views;
 
 	void Start ()
 	{
 		camController = GameObject.Find ("Main Camera").GetComponent<CameraController> ();
 		gm = GameObject.Find ("GameManager").GetComponent<GameManager> ();
 		shipViewPrefab = Resources.Load ("ShipView") as GameObject;
+		zoomButtonPrefab = Resources.Load ("ZoomButton") as GameObject;
 
 		if (isLocalPlayer) {
 			CmdConnect ();
@@ -253,29 +256,36 @@ public class Player : NetworkBehaviour {
 
 	private void UpdateUI ()
 	{
-		if (shipViews != null) {
-			for (int i = 0; i < shipViews.Count; i++) {
-				Destroy (shipViews [i]);
+		if (GameObject.Find ("Canvas").transform.Find ("ZoomButton") == null) {
+			zoomButton = (GameObject)Instantiate (zoomButtonPrefab, Vector3.zero, Quaternion.identity, GameObject.Find ("Canvas").transform);
+			zoomButton.GetComponent<Button>().onClick.AddListener(() => camController.ActionZoom());
+		}
+
+		if (views != null) {
+			for (int i = 0; i < views.Count - 1; i++) {
+				Destroy (views [i]);
 			}
 		}
 
-		shipViews = new List<GameObject>();
+		views = new List<GameObject>();
 
 		for (int i = 0; i < assignedShips.Count; i++) {
 			GameObject newShipView = (GameObject)Instantiate (shipViewPrefab, Vector3.zero, Quaternion.identity, GameObject.Find ("Canvas").transform);
-			shipViews.Add(newShipView);
+			views.Add(newShipView);
 			int assignedShipNumber = i;
 			int shipPrefabIndex = gm.mapData.shipSpawnDatas[i].shipTypeIndex;
 			newShipView.GetComponent<Image>().sprite = gm.shipPrefabs[shipPrefabIndex].icon;
 			newShipView.GetComponent<Button>().onClick.AddListener(() => ShipViewClicked(assignedShipNumber));
 		}
 
+		views.Add (zoomButton);
+
 		PositionViews();
 	}
 
 	private void PositionViews ()
 	{
-		for (int i = 0; i < shipViews.Count; i++) {
+		for (int i = 0; i < views.Count; i++) {
 			float spacingOffset = 0f;
 			if (assignedShips.Count % 2 == 0) {
 				spacingOffset = viewSpacing / 2;
@@ -286,7 +296,7 @@ public class Player : NetworkBehaviour {
 			}
 			Vector3 anchoredPos = new Vector3 (posX, 50f, 0f);
 
-			shipViews[i].GetComponent<RectTransform>().anchoredPosition = anchoredPos;
+			views[i].GetComponent<RectTransform>().anchoredPosition = anchoredPos;
 		}
 
 	}
