@@ -4,6 +4,12 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
 public class CameraController : MonoBehaviour {
+	public enum MovementState
+	{
+		None,
+		Moving,
+		Zooming
+	};
 
 	public bool shipSelected = false;
 
@@ -28,26 +34,21 @@ public class CameraController : MonoBehaviour {
 
 	private float zoomIntervals = 10f;
 
+	private float zoomSpeed = 0.5f;
+
+	MovementState currentState;
+
 	void Start () 
 	{
 		cam = gameObject.GetComponent<Camera>();
 		targetPos = transform.position;
+		currentState = MovementState.None;
 	}
 
 	void Update ()
 	{
 		if (!EventSystem.current.IsPointerOverGameObject () && !shipSelected) {
-			if (Input.GetMouseButtonDown (0)) {
-				momentum = Vector3.zero;
-				target = Vector3.up;
-			}
-
-			if (Input.GetMouseButton (0)) {
-				if (lastPosition != null) {
-					Vector3 delta = (Input.mousePosition - lastPosition);
-					momentum = delta * speed * (cam.orthographicSize / 30);
-				}
-			}
+			CheckForTouches ();
 
 			if (momentum != Vector3.zero) {
 				transform.position += momentum;
@@ -62,8 +63,51 @@ public class CameraController : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.Minus)) {
 			cam.orthographicSize += zoomIntervals;
 		}
+	}
 
-		lastPosition = Input.mousePosition;
+	void CheckForTouches () {
+		if (Input.touchCount == 2)
+			CheckForPinchZoom ();
+		else if (Input.touchCount == 1 || Input.GetMouseButton(0))
+			CheckForScroll ();
+		else
+			currentState = MovementState.None;
+	}
+
+	void CheckForScroll () {
+		if (currentState != MovementState.Moving) {
+			currentState = MovementState.Moving;
+			momentum = Vector3.zero;
+			target = Vector3.up;
+			lastPosition = Input.mousePosition;
+		}
+
+		if (currentState == MovementState.Moving) {
+			if (lastPosition != null) {
+				Vector3 delta = (Input.mousePosition - lastPosition);
+				momentum = delta * speed * (cam.orthographicSize / 30);
+				lastPosition = Input.mousePosition;
+			}
+		}
+	}
+
+	void CheckForPinchZoom () {
+		currentState = MovementState.Zooming;
+
+		Touch touchZero = Input.GetTouch(0);
+		Touch touchOne = Input.GetTouch(1);
+
+		Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
+		Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
+
+		float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
+		float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
+
+		float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
+
+		cam.orthographicSize += deltaMagnitudeDiff * zoomSpeed;
+
+		cam.orthographicSize = Mathf.Max(cam.orthographicSize, 0.1f);
 	}
 
 	private bool mouseOverGameObject ()
