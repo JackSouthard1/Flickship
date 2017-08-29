@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using System.Linq;
 
 public class CameraController : MonoBehaviour {
 	public enum MovementState
@@ -12,6 +13,8 @@ public class CameraController : MonoBehaviour {
 	};
 
 	public bool shipSelected = false;
+
+	private bool actionZoom = false;
 
 	public float interpVelocity;
 	public float minDistance;
@@ -34,9 +37,15 @@ public class CameraController : MonoBehaviour {
 
 	private float zoomIntervals = 10f;
 
+<<<<<<< HEAD
 	private float zoomSpeed = 0.5f;
 
 	MovementState currentState;
+=======
+	private float padding = 10f;
+
+	public List<Transform> visableShips = new List<Transform>();
+>>>>>>> 1e4a94f324354342db280c9cebee3dda224c148b
 
 	void Start () 
 	{
@@ -48,7 +57,22 @@ public class CameraController : MonoBehaviour {
 	void Update ()
 	{
 		if (!EventSystem.current.IsPointerOverGameObject () && !shipSelected) {
+<<<<<<< HEAD
 			CheckForTouches ();
+=======
+			if (Input.GetMouseButtonDown (0)) {
+				actionZoom = false;
+				momentum = Vector3.zero;
+				target = Vector3.up;
+			}
+
+			if (Input.GetMouseButton (0)) {
+				if (lastPosition != null) {
+					Vector3 delta = (Input.mousePosition - lastPosition);
+					momentum = delta * speed * (cam.orthographicSize / 30);
+				}
+			}
+>>>>>>> 1e4a94f324354342db280c9cebee3dda224c148b
 
 			if (momentum != Vector3.zero) {
 				transform.position += momentum;
@@ -107,7 +131,15 @@ public class CameraController : MonoBehaviour {
 
 		cam.orthographicSize += deltaMagnitudeDiff * zoomSpeed;
 
+<<<<<<< HEAD
 		cam.orthographicSize = Mathf.Max(cam.orthographicSize, 0.1f);
+=======
+		lastPosition = Input.mousePosition;
+
+		if (actionZoom) {
+			CalculateActionZoom ();
+		}
+>>>>>>> 1e4a94f324354342db280c9cebee3dda224c148b
 	}
 
 	private bool mouseOverGameObject ()
@@ -161,5 +193,67 @@ public class CameraController : MonoBehaviour {
 			elapsedTime += Time.deltaTime;
 			yield return new WaitForEndOfFrame ();
 		}
+	}
+
+	public void EnterActionZoom () {
+		actionZoom = true;
+	}
+
+	private void CalculateActionZoom () {
+		if (visableShips.Count == 0) {
+			return;
+		}
+
+		float minX = Mathf.Infinity;
+		float maxX = -Mathf.Infinity;
+		float minY = Mathf.Infinity;
+		float maxY = -Mathf.Infinity;
+
+		for (int i = 0; i < visableShips.Count; i++) {
+			Vector2 pos2d = new Vector2 (visableShips [i].position.x, visableShips [i].position.y);
+			if (pos2d.x < minX) {
+				minX = pos2d.x;
+			}
+			if (pos2d.y < minY) {
+				minY = pos2d.y;
+			}
+			if (pos2d.x > maxX) {
+				maxX = pos2d.x;
+			}
+			if (pos2d.y > maxY) {
+				maxY = pos2d.y;
+			}
+		}
+		minX -= padding;
+		maxX += padding;
+		minY -= padding;
+		maxY += padding;
+
+		float xDiff = maxX - minX;
+		float yDiff = maxY - minY;
+
+		// Calculate Center
+		Vector3 center = new Vector3(xDiff/2 + minX, yDiff/2 + minY, 0);
+		SetTarget (center);
+
+		float screenAspect = cam.aspect;
+		float shipAspect = xDiff / yDiff;
+
+		float halfHeight;
+
+		if (shipAspect > screenAspect) {
+			halfHeight = (xDiff / screenAspect) / 2;
+		} else {
+			halfHeight = yDiff / 2;
+		}
+
+		cam.orthographicSize = halfHeight;
+	}
+		
+	public void AddVisableShips (List<Transform> newVisableShips) {
+		for (int i = 0; i < newVisableShips.Count; i++) {
+			visableShips.Add (newVisableShips [i]);
+		}
+		visableShips = visableShips.Distinct().ToList();
 	}
 }

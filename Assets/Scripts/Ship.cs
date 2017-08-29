@@ -344,4 +344,8 @@ public class Ship : MonoBehaviour {
 		float camSize = cam.orthographicSize;
 		clickTrigger.radius = camSize * selectionSizeRatio;
 	}
+
+	public void SendVisibleShips (List<Transform> visableShips) {
+		localPlayer.camController.AddVisableShips (visableShips);
+	}
 }

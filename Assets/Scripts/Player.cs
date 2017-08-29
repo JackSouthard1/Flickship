@@ -258,7 +258,7 @@ public class Player : NetworkBehaviour {
 	{
 		if (GameObject.Find ("Canvas").transform.Find ("ZoomButton") == null) {
 			zoomButton = (GameObject)Instantiate (zoomButtonPrefab, Vector3.zero, Quaternion.identity, GameObject.Find ("Canvas").transform);
-			zoomButton.GetComponent<Button>().onClick.AddListener(() => camController.ActionZoom());
+			zoomButton.GetComponent<Button>().onClick.AddListener(() => camController.EnterActionZoom());
 		}
 
 		if (views != null) {
