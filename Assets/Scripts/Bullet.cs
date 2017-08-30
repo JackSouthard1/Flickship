@@ -23,7 +23,7 @@ public class Bullet : MonoBehaviour {
 	void Start ()
 	{
 		startPos = transform.position;
-		localPlayer = GameObject.Find ("GameManager").GetComponent<GameManager> ().localPlayer;
+		localPlayer = GameManager.instance.localPlayer;
 
 		if (localPlayer.isServer) {
 			masterBullet = true;

@@ -39,7 +39,7 @@ public class Player : NetworkBehaviour {
 	void Start ()
 	{
 		camController = GameObject.Find ("Main Camera").GetComponent<CameraController> ();
-		gm = GameObject.Find ("GameManager").GetComponent<GameManager> ();
+		gm = GameManager.instance;
 		shipViewPrefab = Resources.Load ("ShipView") as GameObject;
 		zoomButtonPrefab = Resources.Load ("ZoomButton") as GameObject;
 
