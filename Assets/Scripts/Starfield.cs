@@ -7,10 +7,11 @@ public class Starfield : MonoBehaviour {
 
 	private Camera cam;
 	private float detectionRange;
-	private float detectionRangeScale = 5f;
+	private float detectionRangeScale = 4f;
+	private float minDetectionRange = 120f;
 
 	public GameObject starfieldPrefab;
-	private float scale = 2f;
+	public float scale = 3f;
 	private float offset;
 
 	private Dictionary<Vector2, FieldData> starfields = new Dictionary<Vector2, FieldData>();
@@ -22,7 +23,7 @@ public class Starfield : MonoBehaviour {
 	}
 	
 	void Update () {
-		detectionRange = cam.orthographicSize * detectionRangeScale;
+		detectionRange = Mathf.Clamp (cam.orthographicSize * detectionRangeScale, minDetectionRange, Mathf.Infinity);
 
 		Vector2[] cords = GetFieldCordinatesInRange ();
 
