@@ -31,6 +31,7 @@ public class JoinGame : MonoBehaviour {
 	}
 
 	public void RefreshRoomList () {
+		ClearRoomList ();
 		networkManager.matchMaker.ListMatches(0, 20, "", false, 0, 0, OnMatchList);
 		status.text = "Loading...";
 	}
@@ -44,11 +45,8 @@ public class JoinGame : MonoBehaviour {
 			return;
 		}
 
-		ClearRoomList ();
-
 		foreach (MatchInfoSnapshot matchInfo in matches) {
-			GameObject roomListItemGO = Instantiate (roomListItemPrefab);
-			roomListItemGO.transform.SetParent(roomListParent);
+			GameObject roomListItemGO = Instantiate (roomListItemPrefab, roomListParent);
 
 			RoomListItem _roomListItem = roomListItemGO.GetComponent<RoomListItem> ();
 			if (_roomListItem != null) {
