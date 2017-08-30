@@ -5,15 +5,15 @@ using UnityEngine.EventSystems;
 using System.Linq;
 
 public class CameraController : MonoBehaviour {
+	public static CameraController instance;
+
 	public enum MovementState
 	{
 		None,
 		Moving,
 		Zooming
 	};
-
-	public bool shipSelected = false;
-
+		
 	private bool actionZoom = false;
 
 	public float interpVelocity;
@@ -30,19 +30,23 @@ public class CameraController : MonoBehaviour {
 	public Vector3 offset;
 	Vector3 targetPos;
 
-	private Vector3 lastPosition;
+	private Vector2 lastPosition;
 	private float speed = -0.06f;
 	private Vector3 momentum = Vector3.zero;
 	private float friction = 0.01f;
 
 	private float zoomIntervals = 10f;
 
-
 	private float zoomSpeed = 0.5f;
 
 	MovementState currentState;
 
 	private float padding = 10f;
+
+	void Awake ()
+	{
+		instance = this;
+	}
 
 	void Start () 
 	{
@@ -53,14 +57,9 @@ public class CameraController : MonoBehaviour {
 
 	void Update ()
 	{
-		if (!EventSystem.current.IsPointerOverGameObject () && !shipSelected) {
-
-			CheckForTouches ();
-
-			if (momentum != Vector3.zero) {
-				transform.position += momentum;
-				momentum *= Mathf.Pow(friction, Time.deltaTime);
-			}
+		if (momentum != Vector3.zero) {
+			transform.position += momentum;
+			momentum *= Mathf.Pow(friction, Time.deltaTime);
 		}
 
 		if (Input.GetKeyDown (KeyCode.Equals)) {
@@ -76,36 +75,40 @@ public class CameraController : MonoBehaviour {
 		}
 	}
 
-	void CheckForTouches () {
+	public void HandleTouchInput () {
 		if (Input.touchCount == 2) {
 			actionZoom = false;
-			CheckForPinchZoom ();
+			ZoomCamera ();
 		} else if (Input.touchCount == 1 || Input.GetMouseButton (0)) {
 			actionZoom = false;
-			CheckForScroll ();
+			MoveCamera ();
 		} else {
-			currentState = MovementState.None;
+			ResetMovementState ();
 		}
 	}
 
-	void CheckForScroll () {
+	public void ResetMovementState () {
+		currentState = MovementState.None;
+	}
+
+	void MoveCamera ()
+	{
 		if (currentState != MovementState.Moving) {
 			currentState = MovementState.Moving;
 			momentum = Vector3.zero;
 			target = Vector3.up;
-			lastPosition = Input.mousePosition;
+			lastPosition = TouchManager.firstTouchPos;
 		}
 
 		if (currentState == MovementState.Moving) {
-			if (lastPosition != null) {
-				Vector3 delta = (Input.mousePosition - lastPosition);
-				momentum = delta * speed * (cam.orthographicSize / 30);
-				lastPosition = Input.mousePosition;
-			}
+			Vector3 delta = (TouchManager.firstTouchPos - lastPosition);
+			momentum = delta * speed * (cam.orthographicSize / 30);
+			lastPosition = TouchManager.firstTouchPos;
 		}
 	}
 
-	void CheckForPinchZoom () {
+	void ZoomCamera ()
+	{
 		currentState = MovementState.Zooming;
 
 		Touch touchZero = Input.GetTouch(0);
@@ -120,15 +123,14 @@ public class CameraController : MonoBehaviour {
 		float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
 
 		cam.orthographicSize += deltaMagnitudeDiff * zoomSpeed;
-
 		cam.orthographicSize = Mathf.Max(cam.orthographicSize, 0.1f);
 
-		lastPosition = Input.mousePosition;
+		lastPosition = TouchManager.firstTouchPos;
 	}
 
 	private bool mouseOverGameObject ()
 	{
-		RaycastHit2D hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint (Input.mousePosition), Vector2.zero);
+		RaycastHit2D hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint (TouchManager.firstTouchPos), Vector2.zero);
  
 		if (hit.collider != null) {
 			return true;

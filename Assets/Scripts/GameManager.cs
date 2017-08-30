@@ -5,6 +5,8 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class GameManager : NetworkBehaviour {
+	public static GameManager instance;
+
 	public List<ShipPrefab> shipPrefabs;
 	public MapData mapData;
 
@@ -37,6 +39,11 @@ public class GameManager : NetworkBehaviour {
 	[Space(10)]
 	public float astroidResolution;
 	public float maxVertexHeightDifference;
+
+	void Awake ()
+	{
+		instance = this;
+	}
 
 	void Start ()
 	{

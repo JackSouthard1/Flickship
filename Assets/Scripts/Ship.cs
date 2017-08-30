@@ -31,8 +31,6 @@ public class Ship : MonoBehaviour {
 	public bool controllable = false;
 	public bool actionUnderway = false;
 
-	GameManager gm;
-
 	Rigidbody2D rb;
 	Transform shipHull;
 	Transform shipGhost;
@@ -69,7 +67,6 @@ public class Ship : MonoBehaviour {
 	{
 		clickTrigger = transform.Find("SelectionZone").GetComponent<CircleCollider2D> ();
 		fov = GetComponent<FieldOfView>();
-		gm = GameObject.Find ("GameManager").GetComponent<GameManager> ();
 		rb = GetComponent<Rigidbody2D> ();
 		shipHull = transform.Find ("ShipHull");
 		shipGhost = transform.Find ("ShipGhost");
@@ -86,17 +83,7 @@ public class Ship : MonoBehaviour {
 		}
 
 		if (controllable) {
-			if (localPlayer.actionState == Player.ActionUnderway.None) {
-				if (gm.activePlayer == assignedPlayerNumber) {
-					if (Input.GetMouseButton (0)) {
-						ClickDown ();
-					}
-
-					if (Input.GetMouseButtonUp (0)) {
-						ClickRelease ();
-					}
-				}
-			} else if (rb.velocity.magnitude <= 0) {
+			if (rb.velocity.magnitude <= 0) {
 				if (localPlayer.actionState == Player.ActionUnderway.MoveAction && actionUnderway) {
 					rb.angularVelocity = 0;
 					actionUnderway = false;
@@ -108,28 +95,43 @@ public class Ship : MonoBehaviour {
 		SetSelectionZone ();
 	}
 
-	private void OnMouseDown ()
+	public IEnumerator Click ()
+	{
+		if (!controllable || localPlayer.actionState != Player.ActionUnderway.None || GameManager.instance.activePlayer != assignedPlayerNumber)
+			yield break;
+
+		ClickDown ();
+
+		while (Input.GetMouseButton(0)) {
+			ClickHold ();
+			yield return new WaitForEndOfFrame ();
+		}
+
+		ClickRelease ();
+	}
+
+	void ClickDown ()
 	{
 		if (!controllable) {
 			return;
 		}
-		if (stage != Stage.Idle || Input.mousePosition.y < shipSelectionZoneY || localPlayer.actionState != Player.ActionUnderway.None || gm.activePlayer != assignedPlayerNumber || !gm.matchStarted || !localPlayer.myTurn) {
+		if (stage != Stage.Idle || localPlayer.actionState != Player.ActionUnderway.None || GameManager.instance.activePlayer != assignedPlayerNumber || !GameManager.instance.matchStarted || !localPlayer.myTurn) {
 			return;
 		}
 
-		Vector3 mousePos3d = cam.ScreenToWorldPoint (Input.mousePosition);
+		Vector3 touchPos3d = cam.ScreenToWorldPoint (TouchManager.firstTouchPos);
 
 		origionalRot = transform.rotation;
-		dragAnchor = new Vector2 (mousePos3d.x, mousePos3d.y);
+		dragAnchor = new Vector2 (touchPos3d.x, touchPos3d.y);
 
-		localPlayer.camController.shipSelected = true;	
+		TouchManager.isShipSelected = true;	
 
 		stage = Stage.LooseDrag;
 
 		sway = 0;
 	}
 
-	void ClickDown ()
+	void ClickHold ()
 	{
 		if (stage == Stage.Idle) {
 			return;
@@ -137,7 +139,7 @@ public class Ship : MonoBehaviour {
 
 		float angle = 0f;
 
-		Vector3 dragPoint3d = cam.ScreenToWorldPoint (Input.mousePosition);
+		Vector3 dragPoint3d = cam.ScreenToWorldPoint (TouchManager.firstTouchPos);
 		dragPoint = new Vector2 (dragPoint3d.x, dragPoint3d.y);
 
 		dragVector = dragPoint - dragAnchor;
@@ -181,7 +183,7 @@ public class Ship : MonoBehaviour {
 		}
 	}
 
-	private void ClickRelease ()
+	void ClickRelease ()
 	{
 		if (stage == Stage.Move) {
 			shipHull.localPosition = Vector3.zero;
@@ -222,7 +224,7 @@ public class Ship : MonoBehaviour {
 		}
 
 		stage = Stage.Idle;
-		localPlayer.camController.shipSelected = false;	
+		TouchManager.isShipSelected = false;	
 		shootPath.gameObject.SetActive(false);
 		shipGhost.gameObject.SetActive(false);
 	}
