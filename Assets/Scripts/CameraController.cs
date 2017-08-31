@@ -37,7 +37,11 @@ public class CameraController : MonoBehaviour {
 
 	private float zoomIntervals = 10f;
 
-	private float zoomSpeed = 0.5f;
+	private float zoomSpeed = 0.2f;
+	private float zoomMomentum = 0f;
+	private float zoomFriction = 0.01f;
+	private float minZoom = 10f;
+	private float maxZoom = 100f;
 
 	MovementState currentState;
 
@@ -60,6 +64,12 @@ public class CameraController : MonoBehaviour {
 		if (momentum != Vector3.zero) {
 			transform.position += momentum;
 			momentum *= Mathf.Pow(friction, Time.deltaTime);
+		}
+
+		if (zoomMomentum != 0f) {
+			cam.orthographicSize += zoomMomentum;
+			zoomMomentum *= Mathf.Pow(friction, Time.deltaTime);
+			cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minZoom, maxZoom);
 		}
 
 		if (Input.GetKeyDown (KeyCode.Equals)) {
@@ -122,10 +132,7 @@ public class CameraController : MonoBehaviour {
 
 		float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
 
-		cam.orthographicSize += deltaMagnitudeDiff * zoomSpeed;
-		cam.orthographicSize = Mathf.Max(cam.orthographicSize, 0.1f);
-
-		lastPosition = TouchManager.firstTouchPos;
+		zoomMomentum = deltaMagnitudeDiff * zoomSpeed;
 	}
 
 	private bool mouseOverGameObject ()
