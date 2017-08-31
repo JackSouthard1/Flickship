@@ -15,6 +15,7 @@ public class CameraController : MonoBehaviour {
 	};
 		
 	private bool actionZoom = false;
+	private float actionZoomLerpSpeed = 1.5f;
 
 	public float interpVelocity;
 	public float minDistance;
@@ -70,19 +71,26 @@ public class CameraController : MonoBehaviour {
 			cam.orthographicSize += zoomMomentum;
 			cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minZoom, maxZoom);
 
-			zoomMomentum *= Mathf.Pow(friction, Time.deltaTime);
+			zoomMomentum *= Mathf.Pow(zoomFriction, Time.deltaTime);
 		}
 
 		if (Input.GetKeyDown (KeyCode.Equals)) {
+			actionZoom = false;
 			cam.orthographicSize -= zoomIntervals;
 		}
 
 		if (Input.GetKeyDown (KeyCode.Minus)) {
+			actionZoom = false;
 			cam.orthographicSize += zoomIntervals;
 		}
+	}
 
+	void LateUpdate ()
+	{
 		if (actionZoom) {
-			CalculateActionZoom ();
+			float halfHeight = GetActionZoomSize ();
+			if(halfHeight != 0)
+				cam.orthographicSize = Mathf.Lerp (cam.orthographicSize, halfHeight, Time.deltaTime * actionZoomLerpSpeed);
 		}
 	}
 
@@ -193,11 +201,11 @@ public class CameraController : MonoBehaviour {
 		actionZoom = true;
 	}
 
-	private void CalculateActionZoom () {
+	float GetActionZoomSize () {
 		List<Transform> visableShips = localPlayer.visableShips;
 
 		if (visableShips.Count == 0) {
-			return;
+			return 0;
 		}
 
 		float minX = Mathf.Infinity;
@@ -243,6 +251,6 @@ public class CameraController : MonoBehaviour {
 			halfHeight = yDiff / 2;
 		}
 
-		cam.orthographicSize = halfHeight;
+		return halfHeight;
 	}
 }
