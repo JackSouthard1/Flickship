@@ -145,19 +145,19 @@ public class Ship : MonoBehaviour {
 		Vector3 dragPoint3d = cam.ScreenToWorldPoint (TouchManager.firstTouchPos);
 		dragPoint = new Vector2 (dragPoint3d.x, dragPoint3d.y);
 
-		dragVector = dragPoint - dragAnchor;
+		dragVector = (dragPoint - dragAnchor) / radiusScale;
 
-		if (dragVector.magnitude > shootRadius * radiusScale) {
+		if (dragVector.magnitude > shootRadius) {
 			stage = Stage.Shoot;
 
-			if (dragVector.magnitude > moveRadius * radiusScale) {
+			if (dragVector.magnitude > moveRadius) {
 				stage = Stage.Move;
 			}
 		} else {
 			stage = Stage.LooseDrag;
 		}
 
-		Vector2 thumbOffset = dragVector.normalized * moveRadius * radiusScale;
+		Vector2 thumbOffset = dragVector.normalized * moveRadius;
 
 		if (stage == Stage.Move) {
 			dragVectorRefined = Vector2.ClampMagnitude (dragVector - thumbOffset, dragRadiusMax);
@@ -257,7 +257,7 @@ public class Ship : MonoBehaviour {
 
 	private void UpdateShootPath ()
 	{
-		float basicRatio = (dragVector.magnitude - shootRadius * radiusScale) / ((moveRadius * radiusScale) - (shootRadius * radiusScale));
+		float basicRatio = (dragVector.magnitude - shootRadius) / ((moveRadius) - (shootRadius));
 		float projectileRange = weapon.projectileRange;
 
 		float modifierRatio = 1;
