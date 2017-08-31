@@ -39,7 +39,7 @@ public class CameraController : MonoBehaviour {
 
 	private float zoomSpeed = 0.2f;
 	private float zoomMomentum = 0f;
-	private float zoomFriction = 0.01f;
+	private float zoomFriction = 0.02f;
 	private float minZoom = 10f;
 	private float maxZoom = 100f;
 
@@ -68,8 +68,9 @@ public class CameraController : MonoBehaviour {
 
 		if (zoomMomentum != 0f) {
 			cam.orthographicSize += zoomMomentum;
-			zoomMomentum *= Mathf.Pow(friction, Time.deltaTime);
 			cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minZoom, maxZoom);
+
+			zoomMomentum *= Mathf.Pow(friction, Time.deltaTime);
 		}
 
 		if (Input.GetKeyDown (KeyCode.Equals)) {
