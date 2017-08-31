@@ -160,7 +160,7 @@ public class Ship : MonoBehaviour {
 		Vector2 thumbOffset = dragVector.normalized * moveRadius * radiusScale;
 
 		if (stage == Stage.Move) {
-			dragVectorRefined = Vector2.ClampMagnitude (dragVector - thumbOffset, dragRadiusMax * radiusScale);
+			dragVectorRefined = Vector2.ClampMagnitude (dragVector - thumbOffset, dragRadiusMax);
 		} else {
 			dragVectorRefined = Vector2.zero;
 		}
@@ -191,7 +191,7 @@ public class Ship : MonoBehaviour {
 		if (stage == Stage.Move) {
 			shipHull.localPosition = Vector3.zero;
 
-			float powerRatio = dragVectorRefined.magnitude / dragRadiusMax * radiusScale;
+			float powerRatio = dragVectorRefined.magnitude / dragRadiusMax;
 
 			Vector2 force = -dragVectorRefined.normalized * powerRatio * thrust;
 
@@ -205,7 +205,7 @@ public class Ship : MonoBehaviour {
 
 			actionUnderway = true;
 
-			float powerRatio = (dragVector.magnitude - shootRadius * radiusScale) / ((moveRadius * radiusScale) - (shootRadius * radiusScale));
+			float powerRatio = (dragVector.magnitude - shootRadius) / ((moveRadius) - (shootRadius));
 
 			int sign;
 			if (powerRatio < 0.5f) {
