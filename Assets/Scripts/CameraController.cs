@@ -41,7 +41,7 @@ public class CameraController : MonoBehaviour {
 
 	MovementState currentState;
 
-	private float padding = 10f;
+	private float padding = 15f;
 
 	void Awake ()
 	{

@@ -50,6 +50,7 @@ public class Ship : MonoBehaviour {
 	private float sway = 0f;
 	private float swayStartTime;
 
+	private float radiusScale = 1f;
 	const float shootRadius = 2f;
 	const float moveRadius = 5f;
 	const float dragRadiusMax = 6f;
@@ -119,6 +120,8 @@ public class Ship : MonoBehaviour {
 			return;
 		}
 
+		radiusScale = cam.orthographicSize / 25f;
+
 		Vector3 touchPos3d = cam.ScreenToWorldPoint (TouchManager.firstTouchPos);
 
 		origionalRot = transform.rotation;
@@ -144,20 +147,20 @@ public class Ship : MonoBehaviour {
 
 		dragVector = dragPoint - dragAnchor;
 
-		if (dragVector.magnitude > shootRadius) {
+		if (dragVector.magnitude > shootRadius * radiusScale) {
 			stage = Stage.Shoot;
 
-			if (dragVector.magnitude > moveRadius) {
+			if (dragVector.magnitude > moveRadius * radiusScale) {
 				stage = Stage.Move;
 			}
 		} else {
 			stage = Stage.LooseDrag;
 		}
 
-		Vector2 thumbOffset = dragVector.normalized * moveRadius;
+		Vector2 thumbOffset = dragVector.normalized * moveRadius * radiusScale;
 
 		if (stage == Stage.Move) {
-			dragVectorRefined = Vector2.ClampMagnitude (dragVector - thumbOffset, dragRadiusMax);
+			dragVectorRefined = Vector2.ClampMagnitude (dragVector - thumbOffset, dragRadiusMax * radiusScale);
 		} else {
 			dragVectorRefined = Vector2.zero;
 		}
@@ -188,7 +191,7 @@ public class Ship : MonoBehaviour {
 		if (stage == Stage.Move) {
 			shipHull.localPosition = Vector3.zero;
 
-			float powerRatio = dragVectorRefined.magnitude / dragRadiusMax;
+			float powerRatio = dragVectorRefined.magnitude / dragRadiusMax * radiusScale;
 
 			Vector2 force = -dragVectorRefined.normalized * powerRatio * thrust;
 
@@ -202,7 +205,7 @@ public class Ship : MonoBehaviour {
 
 			actionUnderway = true;
 
-			float powerRatio = (dragVector.magnitude - shootRadius) / (moveRadius - shootRadius);
+			float powerRatio = (dragVector.magnitude - shootRadius * radiusScale) / ((moveRadius * radiusScale) - (shootRadius * radiusScale));
 
 			int sign;
 			if (powerRatio < 0.5f) {
@@ -254,7 +257,7 @@ public class Ship : MonoBehaviour {
 
 	private void UpdateShootPath ()
 	{
-		float basicRatio = (dragVector.magnitude - shootRadius) / (moveRadius - shootRadius);
+		float basicRatio = (dragVector.magnitude - shootRadius * radiusScale) / ((moveRadius * radiusScale) - (shootRadius * radiusScale));
 		float projectileRange = weapon.projectileRange;
 
 		float modifierRatio = 1;
