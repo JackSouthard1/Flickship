@@ -91,6 +91,7 @@ public class Player : NetworkBehaviour {
 	private void TurnEnd ()
 	{
 		myTurn = false;
+		camController.EnterActionZoom ();
 		CmdTurnOver();
 	}
 
