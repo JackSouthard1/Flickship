@@ -130,6 +130,7 @@ public class GameManager : NetworkBehaviour {
 		waitingText.SetActive(false);
 		actionBar.Enable();
 		localPlayer.SetupUI();
+		CameraController.instance.EnterActionZoom ();
 		GenerateAstroids(seed);
 	}
 
