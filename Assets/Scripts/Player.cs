@@ -219,16 +219,7 @@ public class Player : NetworkBehaviour {
 
 	[ClientRpc]
 	void RpcGameOver (int winningPlayerNumber) {
-		gm.localPlayer.PrintWinner(winningPlayerNumber);
-	}
-
-	void PrintWinner (int winningPlayerNumber)
-	{
-		if (winningPlayerNumber == playerNumber) {
-			print ("You Win!");
-		} else {
-			print ("You lose!");
-		}
+		gm.PrintWinner(winningPlayerNumber);
 	}
 
 	public void HandleBulletMiss (int parentShipNumber)
