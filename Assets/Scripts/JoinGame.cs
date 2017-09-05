@@ -19,6 +19,9 @@ public class JoinGame : MonoBehaviour {
 	[SerializeField]
 	private Transform roomListParent;
 
+	[SerializeField]
+	private Animator refreshAnim;
+
 	void Start ()
 	{
 		networkManager = NetworkManager.singleton;
@@ -27,10 +30,15 @@ public class JoinGame : MonoBehaviour {
 			networkManager.StartMatchMaker();
 		}
 
-		RefreshRoomList();
+		GetRoomList();
 	}
 
 	public void RefreshRoomList () {
+		refreshAnim.SetBool ("isSpinning", true);
+		GetRoomList ();
+	}
+
+	void GetRoomList () {
 		ClearRoomList ();
 		networkManager.matchMaker.ListMatches(0, 20, "", false, 0, 0, OnMatchList);
 		status.text = "Loading...";
@@ -59,6 +67,8 @@ public class JoinGame : MonoBehaviour {
 		if (roomList.Count == 0) {
 			status.text = "No rooms";
 		}
+
+		refreshAnim.SetBool ("isSpinning", false);
     }
 
     void ClearRoomList () {

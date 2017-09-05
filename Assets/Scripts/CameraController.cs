@@ -37,7 +37,14 @@ public class CameraController : MonoBehaviour {
 
 	private float zoomIntervals = 10f;
 
-	private float zoomSpeed = 0.5f;
+	private float zoomSpeed = 0.2f;
+	private float zoomMomentum = 0f;
+	private float zoomFriction = 0.02f;
+	private float minZoom = 10f;
+	private float maxZoom = 100f;
+
+	private float zoomLerpSpeed = 0.1f;
+	private float goalZoomLerpValue;
 
 	MovementState currentState;
 
@@ -51,7 +58,6 @@ public class CameraController : MonoBehaviour {
 	void Start () 
 	{
 		cam = gameObject.GetComponent<Camera>();
-		targetPos = transform.position;
 		currentState = MovementState.None;
 	}
 
@@ -62,16 +68,21 @@ public class CameraController : MonoBehaviour {
 			momentum *= Mathf.Pow(friction, Time.deltaTime);
 		}
 
+		if (zoomMomentum != 0f) {
+			cam.orthographicSize += zoomMomentum;
+			cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minZoom, maxZoom);
+
+			zoomMomentum *= Mathf.Pow(zoomFriction, Time.deltaTime);
+		}
+
 		if (Input.GetKeyDown (KeyCode.Equals)) {
+			actionZoom = false;
 			cam.orthographicSize -= zoomIntervals;
 		}
 
 		if (Input.GetKeyDown (KeyCode.Minus)) {
+			actionZoom = false;
 			cam.orthographicSize += zoomIntervals;
-		}
-
-		if (actionZoom) {
-			CalculateActionZoom ();
 		}
 	}
 
@@ -122,10 +133,7 @@ public class CameraController : MonoBehaviour {
 
 		float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
 
-		cam.orthographicSize += deltaMagnitudeDiff * zoomSpeed;
-		cam.orthographicSize = Mathf.Max(cam.orthographicSize, 0.1f);
-
-		lastPosition = TouchManager.firstTouchPos;
+		zoomMomentum = deltaMagnitudeDiff * zoomSpeed;
 	}
 
 	private bool mouseOverGameObject ()
@@ -146,6 +154,10 @@ public class CameraController : MonoBehaviour {
 	
 	void FixedUpdate () 
 	{
+		if (actionZoom) {
+			goalZoomLerpValue = GetActionZoomSize ();
+		}
+
 		if (target != Vector3.up)
 		{
 			Vector3 posNoZ = transform.position;
@@ -158,6 +170,9 @@ public class CameraController : MonoBehaviour {
 			targetPos = transform.position + (targetDirection.normalized * interpVelocity * Time.deltaTime); 
 
 			transform.position = Vector3.Lerp( transform.position, targetPos + offset, 0.5f);
+
+			if (goalZoomLerpValue != 0)
+				cam.orthographicSize = Mathf.Lerp (cam.orthographicSize, goalZoomLerpValue, zoomLerpSpeed);
 		}
 	}
 
@@ -165,8 +180,10 @@ public class CameraController : MonoBehaviour {
 	{
 		this.target = target;
 		momentum = Vector3.zero;
+		goalZoomLerpValue = padding * 2f;
 	}
 
+	//unused
 	public IEnumerator LerpCamSize (float newSize, float time)
 	{
 		float elapsedTime = 0;
@@ -185,11 +202,11 @@ public class CameraController : MonoBehaviour {
 		actionZoom = true;
 	}
 
-	private void CalculateActionZoom () {
+	float GetActionZoomSize () {
 		List<Transform> visableShips = localPlayer.visableShips;
 
 		if (visableShips.Count == 0) {
-			return;
+			return 0;
 		}
 
 		float minX = Mathf.Infinity;
@@ -235,6 +252,6 @@ public class CameraController : MonoBehaviour {
 			halfHeight = yDiff / 2;
 		}
 
-		cam.orthographicSize = halfHeight;
+		return halfHeight;
 	}
 }

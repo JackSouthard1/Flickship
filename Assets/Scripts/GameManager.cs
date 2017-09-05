@@ -21,6 +21,7 @@ public class GameManager : NetworkBehaviour {
 
 	ActionBar actionBar;
 	GameObject waitingText;
+	Text gameOverText;
 
 	[SerializeField]
 	public Color[] playerColors;
@@ -49,6 +50,8 @@ public class GameManager : NetworkBehaviour {
 	{
 		actionBar = GameObject.Find ("Canvas").transform.Find ("ActionBar").GetComponent<ActionBar> ();
 		waitingText = GameObject.Find ("Canvas").transform.Find ("WaitingText").gameObject;
+		gameOverText = GameObject.Find ("Canvas").transform.Find ("GameOverText").gameObject.GetComponent<Text>();
+		gameOverText.gameObject.SetActive (false);
 
 		menu.SetActive (false);
 		if (isServer) {
@@ -130,6 +133,7 @@ public class GameManager : NetworkBehaviour {
 		waitingText.SetActive(false);
 		actionBar.Enable();
 		localPlayer.SetupUI();
+		CameraController.instance.EnterActionZoom ();
 		GenerateAstroids(seed);
 	}
 
@@ -381,6 +385,17 @@ public class GameManager : NetworkBehaviour {
 		}
 
 		return true;
+	}
+
+	public void PrintWinner (int winningPlayerNumber)
+	{
+		if (winningPlayerNumber == localPlayer.playerNumber) {
+			gameOverText.text = "You win!";
+		} else {
+			gameOverText.text = "You lose!";
+		}
+
+		gameOverText.gameObject.SetActive (true);
 	}
 }
 
