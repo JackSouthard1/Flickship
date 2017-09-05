@@ -9,8 +9,8 @@ public class Ship : MonoBehaviour {
 	[Header("Ship Settings")]
 	public float thrust;
 	public int health;
-	public Weapon weapon;
-	private float shootPathResolution = 5f;
+	[SerializeField]
+	private Weapon[] weapons;
 	private float minPowerRatio = 0.2f;
 
 	private enum Stage
@@ -21,6 +21,8 @@ public class Ship : MonoBehaviour {
 		Move
 	};
 	private Stage stage = Stage.Idle;
+
+	public int liveBullets = 0;
 
 	[Space(50)]
 	[Header("Non Editable")]
@@ -35,8 +37,6 @@ public class Ship : MonoBehaviour {
 	Transform shipHull;
 	Transform shipGhost;
 
-	LineRenderer shootPath;
-
 	Camera cam;
 
 	bool forceQued = false;
@@ -48,11 +48,10 @@ public class Ship : MonoBehaviour {
 	Vector2 dragVectorRefined;
 
 	private float sway = 0f;
-	private float swayStartTime;
 
 	private float radiusScale = 1f;
-	const float shootRadius = 2f;
-	const float moveRadius = 5f;
+	float shootRadius = 2f;
+	float moveRadius = 5f;
 	const float dragRadiusMax = 6f;
 
 	const float velocityToStop = 4f;
@@ -66,12 +65,15 @@ public class Ship : MonoBehaviour {
 
 	void Start ()
 	{
+		weapons = GetComponentsInChildren<Weapon> ();
+		if (weapons.Length == 0) {
+			moveRadius = shootRadius;
+		}
 		clickTrigger = transform.Find("SelectionZone").GetComponent<CircleCollider2D> ();
 		fov = GetComponent<FieldOfView>();
 		rb = GetComponent<Rigidbody2D> ();
 		shipHull = transform.Find ("ShipHull");
 		shipGhost = transform.Find ("ShipGhost");
-		shootPath = transform.Find("ShootPath").GetComponent<LineRenderer>();
 		cam = GameObject.Find ("Main Camera").GetComponent<Camera> ();
 	}
 	
@@ -171,12 +173,17 @@ public class Ship : MonoBehaviour {
 		Quaternion newRot = Quaternion.AngleAxis (angle, Vector3.forward);
 		transform.rotation = newRot;
 
-		if (stage == Stage.Shoot) {
-			CalculateSway();
-			UpdateShootPath();
-			shootPath.gameObject.SetActive (true);
-		} else {
-			shootPath.gameObject.SetActive (false);
+		if (weapons.Length > 0) {
+			if (stage == Stage.Shoot) {
+				sway = weapons [0].CalculateSway ();
+				for (int i = 0; i < weapons.Length; i++) {
+					weapons [i].UpdateShootPath (dragVectorRefined, sway, shootRadius, moveRadius);
+				}
+			} else {
+				for (int i = 0; i < weapons.Length; i++) {
+					weapons [i].DisablePath ();
+				}
+			}
 		}
 
 		if (stage == Stage.Move) {
@@ -228,16 +235,21 @@ public class Ship : MonoBehaviour {
 
 		stage = Stage.Idle;
 		TouchManager.isShipSelected = false;	
-		shootPath.gameObject.SetActive(false);
+		for (int i = 0; i < weapons.Length; i++) {
+			weapons [i].DisablePath ();
+		}
 		shipGhost.gameObject.SetActive(false);
 	}
 
-	public void ShootActionDone ()
+	public void BulletDespawn ()
 	{
-		actionUnderway = false;
+		liveBullets--;
+		if (liveBullets <= 0) {
+			actionUnderway = false;
 
-		if (localPlayer != null) {
-			localPlayer.ActionOver ();
+			if (localPlayer != null) {
+				localPlayer.ActionOver ();
+			}
 		}
 	}
 
@@ -253,80 +265,6 @@ public class Ship : MonoBehaviour {
 			rb.AddForce(forceToBeApplied, ForceMode2D.Impulse);
 			forceQued = false;
 		}
-	}
-
-	private void UpdateShootPath ()
-	{
-		float basicRatio = (dragVector.magnitude - shootRadius) / ((moveRadius) - (shootRadius));
-		float projectileRange = weapon.projectileRange;
-
-		float modifierRatio = 1;
-		int nodeCount = 2;
-
-		shootPath.transform.localRotation = Quaternion.Euler(new Vector3(0,0, sway));
-
-		Vector3[] pathVerts;
-		if (weapon.trajectory == Weapon.Trajectory.Wave) {
-			modifierRatio = (-4f * basicRatio) * (basicRatio - 1f);
-			modifierRatio = Mathf.Clamp (modifierRatio, minPowerRatio, 1f);
-
-			nodeCount = Mathf.RoundToInt (shootPathResolution * projectileRange);
-			shootPath.positionCount = nodeCount;
-
-			float nodeIncriment = 1f / nodeCount;
-			float[] nodePercentageY = new float[nodeCount];
-			for (int i = 0; i < nodePercentageY.Length; i++) {
-				nodePercentageY [i] = nodeIncriment * i;
-			}
-
-			pathVerts = new Vector3[nodeCount];
-			for (int i = 0; i < pathVerts.Length; i++) {
-				float x = 3 * Mathf.Sin (4f * nodePercentageY [i] / modifierRatio);
-				Vector3 localPos = new Vector3 (x, (projectileRange * nodePercentageY [i] + shootPath.transform.localPosition.y), 0);
-				pathVerts [i] = shootPath.transform.TransformPoint (localPos);
-			}
-		} else if (weapon.trajectory == Weapon.Trajectory.Straight) {
-			shootPath.positionCount = 2;
-			pathVerts = new Vector3[2];
-			pathVerts [0] = shootPath.transform.TransformPoint(shootPath.transform.localPosition);
-			pathVerts [1] = shootPath.transform.TransformPoint ((Vector3.up * projectileRange * modifierRatio) + shootPath.transform.localPosition);
-		} else {
-			modifierRatio = (-4f * basicRatio) * (basicRatio - 1f);
-			modifierRatio = Mathf.Clamp (modifierRatio, minPowerRatio, 1f);
-
-			int sign;
-			if (basicRatio < 0.5f) {
-				sign = 1;
-			} else {
-				sign = -1;
-			}
-
-			modifierRatio = modifierRatio * sign;
-
-			nodeCount = Mathf.RoundToInt (shootPathResolution * projectileRange);
-			shootPath.positionCount = nodeCount;
-
-			float nodeIncriment = 1f / nodeCount;
-			float[] nodePercentageY = new float[nodeCount];
-			for (int i = 0; i < nodePercentageY.Length; i++) {
-				nodePercentageY [i] = nodeIncriment * i;
-			}
-
-			pathVerts = new Vector3[nodeCount];
-			for (int i = 0; i < pathVerts.Length; i++) {
-				float x = (100 * nodePercentageY[i] * nodePercentageY[i]) / (4 * modifierRatio);
-				Vector3 localPos = new Vector3 (x, (projectileRange * nodePercentageY [i] + shootPath.transform.localPosition.y), 0);
-				pathVerts [i] = shootPath.transform.TransformPoint (localPos);
-			}
-		}
-		shootPath.SetPositions (pathVerts);
-	}
-
-	private void CalculateSway ()
-	{
-		float timeRatio = (Time.time) / weapon.swayTime;
-		float refinedRatio = Mathf.Sin(2f * Mathf.PI * timeRatio);
-		sway = refinedRatio * weapon.maxSway;
 	}
 
 	private Vector2 RotateVector2 (Vector2 aPoint, float aDegree)

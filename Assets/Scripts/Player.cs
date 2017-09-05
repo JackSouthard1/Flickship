@@ -86,6 +86,7 @@ public class Player : NetworkBehaviour {
 	public void TurnStart ()
 	{
 		myTurn = true;
+		actionsDone = 0;
 	}
 
 	private void TurnEnd ()
@@ -99,12 +100,12 @@ public class Player : NetworkBehaviour {
 	{
 		actionState = ActionUnderway.None;
 		actionsDone++;
+//		print ("Actions used: " + actionsDone);
 
 		CmdSyncShips();
 
 		if (actionsDone >= 2) {
 			TurnEnd();
-			actionsDone = 0;
 		}
 	}
 
@@ -143,24 +144,16 @@ public class Player : NetworkBehaviour {
 
 		var angle = Mathf.Atan2 (direction.y, direction.x) * Mathf.Rad2Deg - 90f;
 		Quaternion newRot = Quaternion.AngleAxis (angle, Vector3.forward);
-
 		ship.transform.rotation = newRot;
 
 		if (actionType == "Move") {
 			ship.GetComponent<Rigidbody2D> ().velocity = direction;
-
 			actionState = ActionUnderway.MoveAction;
 		} else {
-			GameObject newBullet = GameObject.Instantiate (ship.GetComponent<Ship>().weapon.projectilePrefab);
-			Bullet bulletScript = newBullet.GetComponent<Bullet> ();
-			bulletScript.localPlayer = GetComponent<Player> ();
-			bulletScript.parentShipNumber = shipNumber;
-			Weapon weapon = ship.GetComponent<Ship>().weapon;
-			bulletScript.SetupBullet(range: weapon.projectileRange, damage: weapon.projectileDamage, trajectory: weapon.trajectory, powerRatio: direction.magnitude, sign: sign);
-
-			newBullet.transform.rotation = newRot;
-			newBullet.transform.position = ship.transform.Find ("BulletSpawn").position;
-			newBullet.GetComponent<Rigidbody2D> ().velocity = direction.normalized * ship.GetComponent<Ship>().weapon.projectileSpeed;
+			Weapon[] weapons = ship.GetComponentsInChildren<Weapon>();
+			for (int i = 0; i < weapons.Length; i++) {
+				weapons[i].Fire (direction, sign);
+			}
 
 			actionState = ActionUnderway.ShootAction;
 		}
@@ -234,7 +227,7 @@ public class Player : NetworkBehaviour {
 	public void HandleBulletMiss (int parentShipNumber)
 	{
 		if (isServer) {
-			RpcBulletDespawn(parentShipNumber);
+			RpcBulletDespawn (parentShipNumber);
 		}
 	}
 
@@ -242,7 +235,7 @@ public class Player : NetworkBehaviour {
 	public void RpcBulletDespawn (int parentShipNumber)
 	{
 		GameObject parentShip = gm.GetShipWithShipNumber (parentShipNumber);
-		parentShip.GetComponent<Ship> ().ShootActionDone ();
+		parentShip.GetComponent<Ship> ().BulletDespawn ();
 
 		actionState = ActionUnderway.None;
 	}

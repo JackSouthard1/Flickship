@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour {
-	public Weapon.Trajectory trajectory;
+	public ProjectileWeapon.Trajectory trajectory;
 	private float powerRatio = 1;
 	private int sign = 1;
 	private float xOffset = 0;
@@ -11,6 +11,7 @@ public class Bullet : MonoBehaviour {
 	public Player localPlayer;
 	public int parentShipNumber;
 	private bool masterBullet = false;
+	private bool live = true;
 	private float range;
 	private float percentLifetime;
 	private int damage;
@@ -30,7 +31,7 @@ public class Bullet : MonoBehaviour {
 		}
 	}
 
-	public void SetupBullet (float range, int damage, Weapon.Trajectory trajectory, float powerRatio, int sign = 1) {
+	public void SetupBullet (float range, int damage, ProjectileWeapon.Trajectory trajectory, float powerRatio, int sign = 1) {
 		this.range = range;
 		this.damage = damage;
 		this.trajectory = trajectory;
@@ -44,20 +45,23 @@ public class Bullet : MonoBehaviour {
 		distanceTraveled = (transform.position - startPos).magnitude;
 		percentLifetime = distanceTraveled / range;
 
-		if (trajectory == Weapon.Trajectory.Wave) {
+		if (trajectory == ProjectileWeapon.Trajectory.Wave) {
 			CalculateWaveOffset();
 			transform.GetChild(0).localPosition = new Vector3 (xOffset, 0, 0);
-		} else if (trajectory == Weapon.Trajectory.Curve) {
+		} else if (trajectory == ProjectileWeapon.Trajectory.Curve) {
 			CalculateCurveOffset();
 			transform.GetChild(0).localPosition = new Vector3 (xOffset, 0, 0);
 		} 
 
 		if (distanceTraveled > range) {
-			if (masterBullet) {
-				localPlayer.HandleBulletMiss (parentShipNumber);
-			}
+			if (live) {
+				live = false;
+				if (masterBullet) {
+					localPlayer.HandleBulletMiss (parentShipNumber);
+				}
 
-			Destroy (gameObject);
+				Destroy (gameObject);
+			}
 		}
 	}
 
@@ -73,14 +77,25 @@ public class Bullet : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D col)
 	{
 		if (col.gameObject.tag == "Ship") {
-			if (masterBullet) {
-				localPlayer.HandleBulletHit (col.gameObject, parentShipNumber, damage);
+			if (live) {
+				live = false;
+				if (masterBullet) {
+					localPlayer.HandleBulletHit (col.gameObject, parentShipNumber, damage);
+				}
+
+				Destroy (gameObject);
 			}
 
-			Destroy (gameObject);
 		} else if (col.gameObject.tag == "Astroid") {
-			localPlayer.HandleBulletMiss (parentShipNumber);
-			Destroy (gameObject);
+			if (live) {
+				live = false;
+				if (masterBullet) {
+					localPlayer.HandleBulletMiss (parentShipNumber);
+				}
+				print ("Hit Astroid");
+
+				Destroy (gameObject);
+			}
 		}
 	}
 }
