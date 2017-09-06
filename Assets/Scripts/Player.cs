@@ -266,10 +266,15 @@ public class Player : NetworkBehaviour {
 		for (int i = 0; i < assignedShips.Count; i++) {
 			GameObject newShipView = (GameObject)Instantiate (shipViewPrefab, Vector3.zero, Quaternion.identity, GameObject.Find ("Canvas").transform);
 			views.Add(newShipView);
-			int assignedShipNumber = i;
-			int shipPrefabIndex = gm.mapData.shipSpawnDatas[i].shipTypeIndex;
+
+			int shipNumber = assignedShips[i].GetComponent<Ship>().shipNumber;
+			if (shipNumber > gm.mapData.shipSpawnDatas.Count - 1) {
+				shipNumber -= gm.mapData.shipSpawnDatas.Count;
+			}
+			int index = i;
+			int shipPrefabIndex = gm.mapData.shipSpawnDatas[shipNumber].shipTypeIndex;
 			newShipView.GetComponent<Image>().sprite = gm.shipPrefabs[shipPrefabIndex].icon;
-			newShipView.GetComponent<Button>().onClick.AddListener(() => ShipViewClicked(assignedShipNumber));
+			newShipView.GetComponent<Button>().onClick.AddListener(() => ShipViewClicked(index));
 		}
 
 		views.Add (zoomButton);
@@ -281,10 +286,10 @@ public class Player : NetworkBehaviour {
 	{
 		for (int i = 0; i < views.Count; i++) {
 			float spacingOffset = 0f;
-			if (assignedShips.Count % 2 == 0) {
+			if (views.Count % 2 == 0) {
 				spacingOffset = viewSpacing / 2;
 			}
-			float posX = ((i - Mathf.RoundToInt (assignedShips.Count / 2)) * viewSpacing) + spacingOffset;
+			float posX = ((i - Mathf.RoundToInt (views.Count / 2)) * viewSpacing) + spacingOffset;
 			if (playerNumber == 1) {
 				posX = -posX;
 			}
