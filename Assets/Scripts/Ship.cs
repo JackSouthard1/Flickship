@@ -32,6 +32,7 @@ public class Ship : MonoBehaviour {
 	public bool selected = false;
 	public bool controllable = false;
 	public bool actionUnderway = false;
+	public bool actionDone = false;
 
 	Rigidbody2D rb;
 	Transform shipHull;
@@ -76,6 +77,10 @@ public class Ship : MonoBehaviour {
 		shipGhost = transform.Find ("ShipGhost");
 		cam = GameObject.Find ("Main Camera").GetComponent<Camera> ();
 	}
+
+	public void TurnStart () {
+		actionDone = false;
+	}
 	
 	void Update ()
 	{
@@ -118,7 +123,7 @@ public class Ship : MonoBehaviour {
 		if (!controllable) {
 			return;
 		}
-		if (stage != Stage.Idle || localPlayer.actionState != Player.ActionUnderway.None || GameManager.instance.activePlayer != assignedPlayerNumber || !GameManager.instance.matchStarted || !localPlayer.myTurn) {
+		if (stage != Stage.Idle || localPlayer.actionState != Player.ActionUnderway.None || GameManager.instance.activePlayer != assignedPlayerNumber || !GameManager.instance.matchStarted || !localPlayer.myTurn || actionDone) {
 			return;
 		}
 
@@ -206,6 +211,7 @@ public class Ship : MonoBehaviour {
 			origionalRot = transform.rotation;
 
 			localPlayer.HandleShipAction (shipNumber: shipNumber, direction: force, actionType: "Move");
+			actionDone = true;
 		} else if (stage == Stage.Shoot) {
 			Vector2 basicDirection = dragVector.normalized;
 			origionalRot = transform.rotation;
@@ -228,6 +234,7 @@ public class Ship : MonoBehaviour {
 			finalDirection = RotateVector2(finalDirection, sway);
 
 			localPlayer.HandleShipAction (shipNumber: shipNumber, direction: finalDirection, actionType: "Shoot", sign: sign);
+			actionDone = true;
 		} else if (stage == Stage.LooseDrag) {
 			transform.rotation = origionalRot;
 			UpdateFOV ();
@@ -239,6 +246,13 @@ public class Ship : MonoBehaviour {
 			weapons [i].DisablePath ();
 		}
 		shipGhost.gameObject.SetActive(false);
+	}
+
+	public void OutOfTime () {
+		dragVector = Vector2.zero;
+		stage = Stage.LooseDrag;
+		ClickRelease ();
+		actionDone = false;
 	}
 
 	public void BulletDespawn ()

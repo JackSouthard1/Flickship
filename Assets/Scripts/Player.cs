@@ -17,7 +17,10 @@ public class Player : NetworkBehaviour {
 	public bool myTurn = false;
 	private bool waitingForUI = false;
 
-	public int playerNumber;
+	public int playerNumber = -1;
+
+	private bool TurnQued = false;
+	private bool TurnEndQued = false;
 
 	public int actionsDone = 0;
 	GameManager gm;
@@ -30,7 +33,7 @@ public class Player : NetworkBehaviour {
 	private GameObject shipViewPrefab;
 	public GameObject zoomButtonPrefab;
 	private GameObject zoomButton;
-	private List<GameObject> views;
+	private List<GameObject> views = new List<GameObject>();
 
 	public List<Transform> visableShips = new List<Transform>();
 
@@ -67,14 +70,13 @@ public class Player : NetworkBehaviour {
 	{
 		this.playerNumber = playerNumber;
 	
-		if (playerNumber == gm.activePlayer) {
-			TurnStart ();
-		} else {
+		if (playerNumber != gm.activePlayer) {
 			myTurn = false;
 		}
 
 		if (isLocalPlayer) {
 			gm.SetupScene();
+//			print ("Local Player Number Set");
 			camController.SetTarget(assignedShips[0].transform.position);
 
 			if (playerNumber == 1) {
@@ -85,13 +87,28 @@ public class Player : NetworkBehaviour {
 
 	public void TurnStart ()
 	{
-		myTurn = true;
-		actionsDone = 0;
+		if (playerNumber == -1 || views.Count == 0) {
+//			print ("Que Turn Start");
+			TurnQued = true;
+		} else {
+			myTurn = true;
+			gm.actionBar.StartCountdown ();
+			for (int i = 0; i < assignedShips.Count; i++) {
+				assignedShips [i].GetComponent<Ship> ().TurnStart ();
+			}
+			if (views.Count > 0) {
+//				print ("Reset UI");
+				ResetUIColor ();
+			}
+			actionsDone = 0;
+		}
 	}
 
 	private void TurnEnd ()
 	{
 		myTurn = false;
+		actionsDone = assignedShips.Count;
+		gm.actionBar.StopCountdown ();
 		camController.EnterActionZoom ();
 		CmdTurnOver();
 	}
@@ -100,12 +117,11 @@ public class Player : NetworkBehaviour {
 	{
 		actionState = ActionUnderway.None;
 		actionsDone++;
-//		print ("Actions used: " + actionsDone);
+		print ("" + actionsDone + " / " + assignedShips.Count);
 
 		CmdSyncShips();
-
-		if (actionsDone >= 2) {
-			TurnEnd();
+		if (actionsDone >= assignedShips.Count) {
+			TurnEndQued = true;
 		}
 	}
 
@@ -113,6 +129,18 @@ public class Player : NetworkBehaviour {
 	public void CmdSyncShips ()
 	{
 		gm.CmdSyncShips();
+	}
+
+	public void OutOfTime () {
+		TurnEndQued = true;
+	}
+
+	private void TerminateTurn () {
+		for (int i = 0; i < assignedShips.Count; i++) {
+			assignedShips [i].GetComponent<Ship> ().OutOfTime();
+			ShipActionUsed (i);
+		}
+		TurnEnd ();
 	}
 
 	[Command]
@@ -123,7 +151,8 @@ public class Player : NetworkBehaviour {
 	public void HandleShipAction (int shipNumber, Vector2 direction, string actionType, int sign = 1)
 	{
 		CmdShipAction (shipNumber: shipNumber, direction: direction, actionType: actionType, sign: sign);
-		gm.ActionUsed();
+
+		ShipActionUsed (shipNumber);
 	}
 
 	[Command]
@@ -212,6 +241,7 @@ public class Player : NetworkBehaviour {
 
 	[ClientRpc]
 	void RpcGameOver (int winningPlayerNumber) {
+		gm.actionBar.StopCountdown ();
 		gm.PrintWinner(winningPlayerNumber);
 	}
 
@@ -237,6 +267,18 @@ public class Player : NetworkBehaviour {
 	}
 
 	void Update () {
+		if (TurnQued) {
+			if (playerNumber != -1 && views.Count > 0) {
+				TurnQued = false;
+				TurnStart ();
+			}
+		}
+		if (TurnEndQued) {
+			if (actionState == ActionUnderway.None) {
+				TurnEndQued = false;
+				TerminateTurn ();
+			}
+		}
 		if (waitingForUI && assignedShips.Count > 0) {
 			UpdateUI ();
 			PositionViews ();
@@ -244,6 +286,19 @@ public class Player : NetworkBehaviour {
 		}
 
 		RequestVisableShips ();
+	}
+
+	void ShipActionUsed (int index) {
+		if (index > gm.mapData.shipSpawnDatas.Count - 1) {
+			index -= gm.mapData.shipSpawnDatas.Count;
+		}
+		views [index].GetComponent<Image> ().color = new Color (1, 1, 1, 0.25f);
+	}
+
+	void ResetUIColor () {
+		for (int i = 0; i < views.Count; i++) {
+			views [i].GetComponent<Image> ().color = Color.white;
+		}
 	}
 
 	private void UpdateUI ()

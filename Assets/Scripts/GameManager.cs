@@ -19,7 +19,7 @@ public class GameManager : NetworkBehaviour {
 	[Space(20)]
 	public GameObject menu;
 
-	ActionBar actionBar;
+	public ActionBar actionBar;
 	GameObject waitingText;
 	Text gameOverText;
 
@@ -54,9 +54,6 @@ public class GameManager : NetworkBehaviour {
 		gameOverText.gameObject.SetActive (false);
 
 		menu.SetActive (false);
-		if (isServer) {
-			actionBar.TurnStart ();
-		}
 
 		if (allowDebugMatches) {
 			matchStarted = true;
@@ -73,10 +70,10 @@ public class GameManager : NetworkBehaviour {
 	[Command]
 	public void CmdTurnOver ()
 	{
-		if (activePlayer >= playersConnected - 1) {
+		if (activePlayer >= 1) {
 			activePlayer = 0;
 		} else {
-			activePlayer++;
+			activePlayer = 1;
 		}
 
 		RpcTurnOver (activePlayer);
@@ -85,16 +82,11 @@ public class GameManager : NetworkBehaviour {
 	[ClientRpc]
 	public void RpcTurnOver (int newActivePlayer)
 	{
+//		print ("Rpc. New Active Player: " + newActivePlayer);
 		activePlayer = newActivePlayer;
 		if (localPlayer.playerNumber == newActivePlayer) {
 			localPlayer.TurnStart();
-			actionBar.TurnStart();
 		}
-	}
-
-	public void ActionUsed ()
-	{
-		actionBar.ActionUsed();
 	}
 
 	[Command]
@@ -131,8 +123,10 @@ public class GameManager : NetworkBehaviour {
 		}
 
 		waitingText.SetActive(false);
-		actionBar.Enable();
 		localPlayer.SetupUI();
+		if (localPlayer.playerNumber == activePlayer) {
+			localPlayer.TurnStart ();
+		}
 		CameraController.instance.EnterActionZoom ();
 		GenerateAstroids(seed);
 	}

@@ -12,8 +12,9 @@ public class ActionBar : MonoBehaviour {
 
 	private RectTransform rectTransform;
 
-	int maxActions = 2;
-	int actionsLeft = 0;
+	bool timerActive = false;
+	float turnTime = 10;
+	float timeLeft = 0;
 
 	float width;
 
@@ -22,33 +23,35 @@ public class ActionBar : MonoBehaviour {
 		width = rectTransform.rect.width;
 	}
 
-	public void Enable ()
-	{
-		background.GetComponent<Image>().enabled = true;
-		fill.GetComponent<Image>().enabled = true;
-		UpdateUI();
-	}
-
-	public void TurnStart () {
-		actionsLeft = maxActions;
+	public void StartCountdown () {
+		timeLeft = turnTime;
+		timerActive = true;
 		fill.gameObject.SetActive(true);
 		background.gameObject.SetActive(true);		
 		UpdateUI ();
 	}
 
-	public void ActionUsed ()
+	public void StopCountdown () {
+		timerActive = false;
+		fill.gameObject.SetActive (false);
+		background.gameObject.SetActive (false);
+	}
+
+	void Update ()
 	{
-		actionsLeft = actionsLeft - 1;
-		if (actionsLeft <= 0) {
-			fill.gameObject.SetActive(false);
-			background.gameObject.SetActive(false);		
-		} else {
-			UpdateUI ();
+		if (timerActive) {
+			if (timeLeft > 0) {
+				timeLeft -= Time.deltaTime;
+				UpdateUI ();
+			} else {
+				GameManager.instance.localPlayer.OutOfTime ();
+				StopCountdown ();
+			}
 		}
 	}
 
 	void UpdateUI () {
-		float newWidth = actionsLeft * (width / maxActions) - width;
+		float newWidth = timeLeft * (width / turnTime) - width;
 		fill.offsetMax = new Vector2 (newWidth, fill.offsetMax.y);
 	}
 }
