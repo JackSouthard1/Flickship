@@ -136,6 +136,7 @@ public class GameManager : NetworkBehaviour {
 	{	
 		ships[shipNumber].transform.Find("ShipHull").GetComponent<SpriteRenderer>().color = playerColors[colorIndex];
 		ships[shipNumber].transform.Find("ShipGhost").GetComponent<SpriteRenderer>().color = playerColors[colorIndex];
+		ships[shipNumber].transform.Find("ShipBlink").GetComponent<SpriteRenderer>().color = playerColors[colorIndex];
 	}
 
 	[ClientRpc]

@@ -32,7 +32,8 @@ public class Ship : MonoBehaviour {
 	public bool selected = false;
 	public bool controllable = false;
 	public bool actionUnderway = false;
-	public bool actionDone = false;
+	public bool actionDone = true;
+	private bool blinking = false;
 
 	Rigidbody2D rb;
 	Transform shipHull;
@@ -64,6 +65,12 @@ public class Ship : MonoBehaviour {
 	private CircleCollider2D clickTrigger;
 	private float selectionSizeRatio = 0.2f;
 
+	private Transform shipBlink;
+	private float blinkMin;
+	private float blinkMax;
+	private float blinkSizeRatio = 1.5f;
+	private float blinkRate = 1f;
+
 	void Start ()
 	{
 		weapons = GetComponentsInChildren<Weapon> ();
@@ -76,10 +83,15 @@ public class Ship : MonoBehaviour {
 		shipHull = transform.Find ("ShipHull");
 		shipGhost = transform.Find ("ShipGhost");
 		cam = GameObject.Find ("Main Camera").GetComponent<Camera> ();
+
+		shipBlink = transform.Find ("ShipBlink");
+		blinkMin = shipBlink.localScale.x;
+		blinkMax = blinkMin * blinkSizeRatio;
 	}
 
 	public void TurnStart () {
 		actionDone = false;
+		blinking = true;
 	}
 	
 	void Update ()
@@ -98,6 +110,12 @@ public class Ship : MonoBehaviour {
 					localPlayer.ActionOver ();
 				}
 			}
+		}
+
+		if (blinking) {
+			Blink ();
+		} else {
+			shipBlink.gameObject.SetActive (false);
 		}
 
 		SetSelectionZone ();
@@ -146,6 +164,8 @@ public class Ship : MonoBehaviour {
 		if (stage == Stage.Idle) {
 			return;
 		}
+
+		blinking = false;
 
 		float angle = 0f;
 
@@ -212,6 +232,7 @@ public class Ship : MonoBehaviour {
 
 			localPlayer.HandleShipAction (shipNumber: shipNumber, direction: force, actionType: "Move");
 			actionDone = true;
+			blinking = false;
 		} else if (stage == Stage.Shoot) {
 			Vector2 basicDirection = dragVector.normalized;
 			origionalRot = transform.rotation;
@@ -234,10 +255,12 @@ public class Ship : MonoBehaviour {
 			finalDirection = RotateVector2(finalDirection, sway);
 
 			localPlayer.HandleShipAction (shipNumber: shipNumber, direction: finalDirection, actionType: "Shoot", sign: sign);
+			blinking = false;
 			actionDone = true;
 		} else if (stage == Stage.LooseDrag) {
 			transform.rotation = origionalRot;
 			UpdateFOV ();
+			blinking = true;
 		}
 
 		stage = Stage.Idle;
@@ -253,6 +276,7 @@ public class Ship : MonoBehaviour {
 		stage = Stage.LooseDrag;
 		ClickRelease ();
 		actionDone = false;
+		blinking = false;
 	}
 
 	public void BulletDespawn ()
@@ -303,5 +327,12 @@ public class Ship : MonoBehaviour {
 	private void SetSelectionZone () {
 		float camSize = cam.orthographicSize;
 		clickTrigger.radius = camSize * selectionSizeRatio;
+	}
+
+	private void Blink () {
+		float curBlink = Mathf.Clamp01((Time.time * blinkRate) - Mathf.Floor (Time.time * blinkRate));
+		float scale = (curBlink * (blinkMax - blinkMin)) + blinkMin;
+		shipBlink.localScale = new Vector3 (scale, scale, 1);
+		shipBlink.gameObject.SetActive (true);
 	}
 }
