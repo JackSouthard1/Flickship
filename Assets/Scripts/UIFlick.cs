@@ -113,7 +113,9 @@ public class UIFlick : MonoBehaviour {
 //			float powerRatio = dragDistanceRefined / (maxDragDistance - moveRadius);
 			GetComponent<Rigidbody2D>().velocity = new Vector2(0, dragForce);
 
-			released = true;		
+			released = true;
+
+			GameObject.FindObjectOfType<MainMenu> ().StartServerListTransition ();
 		} else {
 			stage = Stage.Idle;
 		}
