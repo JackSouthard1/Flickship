@@ -22,7 +22,7 @@ public class Ship : MonoBehaviour {
 	};
 	private Stage stage = Stage.Idle;
 
-	public int liveBullets = 0;
+	public int liveProjectiles = 0;
 
 	[Space(50)]
 	[Header("Non Editable")]
@@ -73,6 +73,7 @@ public class Ship : MonoBehaviour {
 
 	void Start ()
 	{
+		origionalRot = transform.rotation;
 		weapons = GetComponentsInChildren<Weapon> ();
 		if (weapons.Length == 0) {
 			moveRadius = shootRadius;
@@ -272,17 +273,22 @@ public class Ship : MonoBehaviour {
 	}
 
 	public void OutOfTime () {
-		dragVector = Vector2.zero;
-		stage = Stage.LooseDrag;
-		ClickRelease ();
-		actionDone = false;
+		stage = Stage.Idle;
+		actionDone = true;
+		actionUnderway = false;
 		blinking = false;
+		transform.rotation = origionalRot;
+		for (int i = 0; i < weapons.Length; i++) {
+			weapons [i].DisablePath ();
+		}
+		shipHull.localPosition = Vector3.zero;
+		UpdateFOV ();
 	}
 
 	public void BulletDespawn ()
 	{
-		liveBullets--;
-		if (liveBullets <= 0) {
+		liveProjectiles--;
+		if (liveProjectiles <= 0) {
 			actionUnderway = false;
 
 			if (localPlayer != null) {

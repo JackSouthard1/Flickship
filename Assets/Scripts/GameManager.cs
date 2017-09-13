@@ -13,7 +13,6 @@ public class GameManager : NetworkBehaviour {
 	[HideInInspector]
 	public int activePlayer = 0;
 	public int playersConnected = 0;
-	[HideInInspector]
 	public Player localPlayer;
 	private List<GameObject> ships;
 	[Space(20)]
@@ -84,6 +83,12 @@ public class GameManager : NetworkBehaviour {
 	{
 //		print ("Rpc. New Active Player: " + newActivePlayer);
 		activePlayer = newActivePlayer;
+		GameObject[] shields = GameObject.FindGameObjectsWithTag("Projectile");
+		for (int i = 0; i < shields.Length; i++) {
+			if (shields [i].GetComponent<Shield> () != null) {
+				shields [i].GetComponent<Shield> ().TurnOver ();
+			}
+		}
 		if (localPlayer.playerNumber == newActivePlayer) {
 			localPlayer.TurnStart();
 		}

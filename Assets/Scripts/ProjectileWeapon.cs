@@ -14,7 +14,6 @@ public class ProjectileWeapon : Weapon {
 
 	public float projectileSpeed;
 	public float projectileRange;
-	public int projectileDamage;
 
 	public GameObject projectilePrefab;
 
@@ -23,16 +22,16 @@ public class ProjectileWeapon : Weapon {
 		var angle = Mathf.Atan2 (direction.y, direction.x) * Mathf.Rad2Deg - 90f;
 		Quaternion newRot = Quaternion.AngleAxis (angle, Vector3.forward);
 
-		GameObject newBullet = GameObject.Instantiate (projectilePrefab);
-		Bullet bulletScript = newBullet.GetComponent<Bullet> ();
-		bulletScript.localPlayer = parentShip.localPlayer;
-		bulletScript.parentShipNumber = parentShip.shipNumber;
-		bulletScript.SetupBullet(range: projectileRange, damage: projectileDamage, trajectory: trajectory, powerRatio: direction.magnitude, sign: sign);
+		GameObject newProjectile = GameObject.Instantiate (projectilePrefab);
+		Projectile projectileScript = newProjectile.GetComponent<Projectile> ();
+		projectileScript.localPlayer = parentShip.localPlayer;
+		projectileScript.parentShipNumber = parentShip.shipNumber;
 
-		newBullet.transform.rotation = newRot;
-		newBullet.transform.position = transform.position;
-		newBullet.GetComponent<Rigidbody2D> ().velocity = direction.normalized * projectileSpeed;
-		parentShip.liveBullets++;
+		newProjectile.transform.rotation = newRot;
+		newProjectile.transform.position = transform.position;
+		newProjectile.GetComponent<Rigidbody2D> ().velocity = direction.normalized * projectileSpeed;
+		projectileScript.SetupProjectile(range: projectileRange, trajectory: trajectory, powerRatio: direction.magnitude, sign: sign);
+		parentShip.liveProjectiles++;
 
 	}
 

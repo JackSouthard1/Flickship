@@ -117,7 +117,7 @@ public class Player : NetworkBehaviour {
 	{
 		actionState = ActionUnderway.None;
 		actionsDone++;
-		print ("" + actionsDone + " / " + assignedShips.Count);
+//		print ("" + actionsDone + " / " + assignedShips.Count);
 
 		CmdSyncShips();
 		if (actionsDone >= assignedShips.Count) {
@@ -140,6 +140,7 @@ public class Player : NetworkBehaviour {
 			assignedShips [i].GetComponent<Ship> ().OutOfTime();
 			ShipActionUsed (i);
 		}
+		CmdSyncShips ();
 		TurnEnd ();
 	}
 
@@ -190,7 +191,15 @@ public class Player : NetworkBehaviour {
 		ship.GetComponent<Ship>().UpdateFOV();
 	}
 
-	public void HandleBulletHit (GameObject hit, int parentShipNumber, int damage)
+//	public void HandleBulletHitShield (GameObject hit, int parentShipNumber, int damage) {
+//		if (isServer) {
+//			int hitShipNumber = hit.GetComponent<Ship> ().shipNumber;
+//			RpcBulletHit (hitShipNumber, damage);
+//			RpcBulletDespawn (parentShipNumber);
+//		}
+//	}
+
+	public void HandleBulletHitShip (GameObject hit, int parentShipNumber, int damage)
 	{
 		if (isServer) {
 			int hitShipNumber = hit.GetComponent<Ship> ().shipNumber;
@@ -245,7 +254,7 @@ public class Player : NetworkBehaviour {
 		gm.PrintWinner(winningPlayerNumber);
 	}
 
-	public void HandleBulletMiss (int parentShipNumber)
+	public void HandleProjectileActionComplete (int parentShipNumber)
 	{
 		if (isServer) {
 			RpcBulletDespawn (parentShipNumber);
