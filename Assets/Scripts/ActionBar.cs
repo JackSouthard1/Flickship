@@ -13,7 +13,7 @@ public class ActionBar : MonoBehaviour {
 	private RectTransform rectTransform;
 
 	bool timerActive = false;
-	float turnTime = 10;
+	public float turnTime = 10;
 	float timeLeft = 0;
 
 	float width;

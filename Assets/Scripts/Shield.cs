@@ -6,10 +6,10 @@ public class Shield : Projectile {
 	public enum Shape {
 		Straight,
 		Semicircle,
-		Circle
 	};
 	public Shape shape;
 	public float size;
+	public float heightRatio = 1f;
 
 	public int liveTimeInTurns;
 	public int health;
@@ -64,7 +64,12 @@ public class Shield : Projectile {
 		finalPositions = new Vector3[totalPositionCount];
 		float x = -size;
 		for (int i = 0; i < finalPositions.Length; i++) {
-			float y = CalculateSemicircle (x);
+			// default to line shape
+			float y = 0f;
+			if (shape == Shape.Semicircle) {
+				y = CalculateSemicircle (x);
+			}
+
 			finalPositions [i] = transform.TransformPoint(new Vector3 (x, y, 3f));
 
 			x += incriment;
@@ -105,9 +110,9 @@ public class Shield : Projectile {
 	}
 
 	private float CalculateSemicircle (float x) {
-		return Mathf.Sqrt (-(x * x) + (size * size)) - size;
+		return (Mathf.Sqrt (-(x * x) + (size * size)) - size) * heightRatio;
 	}
-
+		
 	void DrawEdgeCollider () {
 		Vector2[] colPoints = new Vector2[finalPositions.Length];
 		for (int i = 0; i < colPoints.Length; i++) {
