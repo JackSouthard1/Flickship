@@ -241,7 +241,7 @@ public class CameraController : MonoBehaviour {
 		Vector3 center = new Vector3(xDiff/2 + minX, yDiff/2 + minY, 0);
 		SetTarget (center);
 
-		float screenAspect = cam.aspect;
+		float screenAspect = Mathf.Min((9f/16f), cam.aspect);
 		float shipAspect = xDiff / yDiff;
 
 		float halfHeight;
