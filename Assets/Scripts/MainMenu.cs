@@ -33,6 +33,5 @@ public class MainMenu : MonoBehaviour
 	void ExitMainMenu () {
 		isMainMenu = false;
 		gameObject.SetActive (false);
-		GameObject.FindObjectOfType<JoinGame> ().StartMatchMaker ();
 	}
 }

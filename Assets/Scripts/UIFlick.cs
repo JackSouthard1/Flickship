@@ -107,7 +107,7 @@ public class UIFlick : MonoBehaviour {
 
 	void ClickRelease ()
 	{
-		if (stage == Stage.Move) {
+		if (stage == Stage.Move && button.localPosition.magnitude > 0.1f) {			
 			button.localPosition = Vector3.zero;
 
 //			float powerRatio = dragDistanceRefined / (maxDragDistance - moveRadius);
@@ -117,6 +117,7 @@ public class UIFlick : MonoBehaviour {
 
 			GameObject.FindObjectOfType<MainMenu> ().StartServerListTransition ();
 		} else {
+			button.localPosition = Vector3.zero;
 			stage = Stage.Idle;
 		}
 	}

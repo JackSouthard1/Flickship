@@ -25,9 +25,7 @@ public class JoinGame : MonoBehaviour {
 	void Start ()
 	{
 		networkManager = NetworkManager.singleton;
-	}
 
-	public void StartMatchMaker () {
 		if (networkManager.matchMaker == null) {
 			networkManager.StartMatchMaker();
 		}
