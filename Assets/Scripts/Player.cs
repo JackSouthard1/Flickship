@@ -231,10 +231,24 @@ public class Player : NetworkBehaviour {
 //				print ("Removed ship number: " + curShip.shipNumber);
 				UpdateUI ();
 
-				if (assignedShips.Count <= 0) {
+				if (HasNoAttackShips) {
 					CmdAllPlayerShipsDestroyed(playerNumber);
 				}
 			}
+		}
+	}
+
+	bool HasNoAttackShips {
+		get {
+			if (assignedShips.Count <= 0)
+				return true;
+
+			foreach (GameObject shipObj in assignedShips) {
+				if (shipObj.transform.Find ("Weapon") != null)
+					return false;
+			}
+
+			return true;
 		}
 	}
 
@@ -300,6 +314,11 @@ public class Player : NetworkBehaviour {
 	void ShipActionUsed (int index) {
 		if (index > gm.mapData.shipSpawnDatas.Count - 1) {
 			index -= gm.mapData.shipSpawnDatas.Count;
+		}
+
+		if (index >= views.Count) {
+			Debug.LogError ("Index is out of range: " + index);
+			return;
 		}
 		views [index].GetComponent<Image> ().color = new Color (1, 1, 1, 0.25f);
 	}
